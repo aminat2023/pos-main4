@@ -13,14 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('supplier_payments', function (Blueprint $table) {
             $table->id();
-            $table->string('supplier_name');
-            $table->text('supplier_address');
-            $table->string('phone_number');
-            $table->string('e_mail');
+            $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount_paid', 10, 2);
+            $table->string('payment_method'); // e.g., cash, transfer, bank
+            $table->date('payment_date');
             $table->timestamps();
         });
+        
     }
 
     /**
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('supplier_payments');
     }
 };

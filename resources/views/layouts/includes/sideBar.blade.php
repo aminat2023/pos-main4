@@ -23,6 +23,11 @@
     <li>
         <a href="{{ route('sub_categories.index') }}"><i class="fa fa-list-alt"></i>Sub Categories</a>
     </li>
+    <li>
+        <a href="" >
+            <i class="fa fa-cog"></i> Settings
+        </a>
+    </li>
   
 </ul>
 </nav>
