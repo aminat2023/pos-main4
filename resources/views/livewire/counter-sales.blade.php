@@ -2,9 +2,16 @@
     <div class="row">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header" style="background:#008B8B; color:#ffff;">
-                    <h4 style="float:left"> PAYMENT</h4>
+                <div class="card-header d-flex justify-content-between align-items-center" style="background:#008B8B; color:#ffff;">
+                    <h4 class="mb-0">PAYMENT</h4>
+                    
+                    <div>
+                        <h5 class="mb-0" style="font-weight: bold;">
+                            TILL: ₦{{ number_format($this->tillTotal, 2) }}
+                        </h5>
+                    </div>
                 </div>
+                
             
                 <div class="card-body">
                     <form wire:submit.prevent="addSelectedProductToCart">
@@ -17,8 +24,8 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" style="background:#008B8B; color:#fff;" class="btn btn">Add to
-                            Cart</button>
+                        {{-- <button type="submit" style="background:#008B8B; color:#fff;" class="btn btn">Add to
+                            Cart</button> --}}
                     </form>
 
                     @if ($message)
@@ -145,24 +152,27 @@
                             <div class="payment-section" style="display: inline-block; text-align: left;">
                                 <h5>Payment</h5>
                                 <div class="radio-item">
-                                    <input type="radio" id="payment_method_cash" name="payment_method"
-                                        value="cash" checked>
-                                    <label for="payment_method_cash"><i class="fa fa-money-bill text-success"></i>
-                                        Cash</label>
+                                    <input type="radio" id="payment_method_cash"
+                                     value="cash" 
+                                     wire:model="payment_method">
+                                    <label for="payment_method_cash">
+                                        <i class="fa fa-money-bill text-success"></i> Cash
+                                    </label>
                                 </div>
                                 <div class="radio-item">
-                                    <input type="radio" id="payment_method_bank" name="payment_method"
-                                        value="bank_transfer">
-                                    <label for="payment_method_bank"><i class="fa fa-university text-danger"></i> Bank
-                                        Transfer</label>
+                                    <input type="radio" id="payment_method_bank" value="bank_transfer" wire:model="payment_method">
+                                    <label for="payment_method_bank">
+                                        <i class="fa fa-university text-danger"></i> Bank Transfer
+                                    </label>
                                 </div>
                                 <div class="radio-item">
-                                    <input type="radio" id="payment_method_card" name="payment_method"
-                                        value="credit_card">
-                                    <label for="payment_method_card"><i class="fa fa-credit-card text-success"></i>
-                                        Credit Card</label>
+                                    <input type="radio" id="payment_method_card" value="credit_card" wire:model="payment_method">
+                                    <label for="payment_method_card">
+                                        <i class="fa fa-credit-card text-success"></i> Credit Card
+                                    </label>
                                 </div>
                             </div>
+                            
 
                             <div class="payment-field" style="display: inline-block; width: 100%;">
                                 <label for="paid_amount">Payment</label>
@@ -196,7 +206,7 @@
 
                 <div class="modal">
                     <div id="print">
-                        @include('reports.receipt')
+                        @includeIf('receipts.' . $receiptTemplate, ['orderItems' => $orderItems, 'pay_money' => $pay_money, 'balance' => $balance])
                     </div>
                 </div>
             </div>

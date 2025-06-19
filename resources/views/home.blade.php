@@ -6,7 +6,9 @@
             <div>
                 <div class="container2">
                     <h1 class="card-header">
-                        <span class="marquee-text">Welcome to AppGate Pos Management</span>
+                        <span class="marquee-text"> <h1>{{ getPreference('business_name', 'My Business') }}</h1>
+                        </span>
+                        
                     </h1>
                     <div class="card-body">
                         @if (session('status'))

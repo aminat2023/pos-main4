@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User; // Use the correct User model
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -10,30 +10,33 @@ class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $users = User::all(); // Get all users
-        return view('users.index', compact('users'));
+    // public function index()
+    // {
+    //     $users = User::all();
+    //     return view('users.index', compact('users'));
+    // }
+
+
+    public function index(Request $request)
+{
+    $users = User::all();
+
+    // Check if a user is selected for viewing
+    $selectedUser = null;
+    if ($request->has('view')) {
+        $selectedUser = User::find($request->view);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+    return view('users.index', compact('users', 'selectedUser'));
+}
+
+
+ 
+
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
@@ -41,83 +44,53 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'is_admin' => 'required|boolean',
+            'phone' => 'nullable|string|max:20',
+            'password' => 'required|string|min:6',
+            'confirm_password' => 'required|same:password',
+            'is_admin' => 'required|in:0,1',
         ]);
-    
-        // Create a new User
+
+        // Create and save user
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
-        // $user->phone = $request->phone; // Store phone number
-        $user->password = Hash::make($request->password); // Secure password hashing
+        $user->phone = $request->phone;
+        $user->password = Hash::make($request->password);
         $user->is_admin = $request->is_admin;
         $user->save();
-    
-        if ($user) {
-            return redirect()->back()->with('success', 'User created successfully');
-        }
-        return redirect()->back()->with('error', 'User failed to create');
+
+        return redirect()->back()->with('success', 'User created successfully');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
-     */
-    public function show(User $user)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(User $user)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * Update the specified user in storage.
      */
     public function update(Request $request, User $user)
     {
-        // Validate the request
+        // Validate request
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            // 'phone' => 'required|string|max:15', // Adjust this if necessary
-            'password' => 'nullable|string|min:8',
-            'is_admin' => 'required|boolean',
+            'phone' => 'nullable|string|max:20',
+            'password' => 'nullable|string|min:6',
+            'is_admin' => 'required|in:0,1',
         ]);
-    
-        // Update user details
+
+        // Update user fields
         $user->name = $request->name;
         $user->email = $request->email;
-        //  $user->phone = $request->phone; // Uncomment if you intend to update the phone number
+        $user->phone = $request->phone;
         if ($request->filled('password')) {
-            $user->password = Hash::make($request->password); // Update password if provided
+            $user->password = Hash::make($request->password);
         }
         $user->is_admin = $request->is_admin;
         $user->save();
-    
+
         return redirect()->back()->with('success', 'User updated successfully');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * Remove the specified user from storage.
      */
     public function destroy(User $user)
     {
@@ -125,5 +98,3 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'User deleted successfully');
     }
 }
-
-

@@ -13,8 +13,8 @@
                 <i class="fa fa-truck"></i> Supplies
             </button>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{ route('suppliers.create') }}"><i class="fa fa-list"></i> Supplier  Information</a>
-                <a class="dropdown-item" href="{{ route('supplies.create') }}"><i class="fa fa-plus"></i> Add New Supply</a>
+                <a class="dropdown-item" href="{{ route('suppliers.create') }}"><i class="fa fa-plus"></i> Add New Supplier</a>
+                <a class="dropdown-item" href="{{ route('supplies.create') }}"><i class="fa fa-plus"></i> Register  Supplied goods</a>
                 <a class="dropdown-item" href="{{ route('supplies.index') }}"><i class="fa fa-list"></i> Goods Supplied</a>
                 
             </div>
@@ -90,3 +90,7 @@
         /* Set a base font size */
     }
 </style>
+
+
+
+

@@ -55,6 +55,7 @@
         background-color: #f7ffff;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 139, 139, 0.2);
+       
     }
 
     .header-section {
