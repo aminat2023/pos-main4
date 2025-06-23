@@ -2,10 +2,14 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "fruitcake/laravel-cors": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
@@ -13,6 +17,7 @@
         "laravel/tinker": "^2.7",
         "laravel/ui": "^3.0",
         "livewire/livewire": "^2.12",
+        "maatwebsite/excel": "^3.1",
         "picqer/php-barcode-generator": "^3.2"
     },
     "require-dev": {
@@ -24,17 +29,17 @@
         "phpunit/phpunit": "^9.5.10",
         "spatie/laravel-ignition": "^1.0"
     },
-   "autoload": {
-    "psr-4": {
-        "App\\": "app/",
-        "Database\\Factories\\": "database/factories/",
-        "Database\\Seeders\\": "database/seeders/"
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "app/helpers.php",
+            "app/Helpers/ActivityLogger.php"
+        ]
     },
-    "files": [
-        "app/helpers.php"
-    ]
-},
-
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
@@ -70,8 +75,4 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true
-
-    
 }
-
-

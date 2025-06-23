@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Search</title>
+    <style>
+        .container {
+            width: 400px;
+            margin: 100px auto;
+            font-family: Arial, sans-serif;
+        }
+
+        .position-relative {
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid #ccc;
+            border-top: none;
+            background-color: white;
+            display: none;
+            z-index: 1000;
+        }
+
+        .suggestions div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .suggestions div:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Search Product</h3>
+    <div class="position-relative">
+        <input type="text" id="productSearch" placeholder="Type product name...">
+        <div id="suggestionBox" class="suggestions"></div>
+    </div>
+</div>
+
+<script>
+    const products = [
+        "Milk",
+        "Sugar",
+        "Toothpaste",
+        "Shampoo",
+        "Butter",
+        "Face Cream",
+        "Body Lotion",
+        "Hair Gel",
+        "Tea",
+        "Coffee"
+    ];
+
+    const input = document.getElementById('productSearch');
+    const suggestionBox = document.getElementById('suggestionBox');
+
+    input.addEventListener('input', function () {
+        const query = input.value.toLowerCase();
+        suggestionBox.innerHTML = '';
+
+        if (query.length === 0) {
+            suggestionBox.style.display = 'none';
+            return;
+        }
+
+        const filtered = products.filter(p => p.toLowerCase().includes(query));
+
+        if (filtered.length === 0) {
+            suggestionBox.style.display = 'none';
+            return;
+        }
+
+        filtered.forEach(product => {
+            const div = document.createElement('div');
+            div.textContent = product;
+            div.addEventListener('click', function () {
+                input.value = product;
+                suggestionBox.style.display = 'none';
+            });
+            suggestionBox.appendChild(div);
+        });
+
+        suggestionBox.style.display = 'block';
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!input.contains(e.target) && !suggestionBox.contains(e.target)) {
+            suggestionBox.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>

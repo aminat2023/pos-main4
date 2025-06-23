@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container" style="color: white;">
     <h2>Daily Sales History</h2>
-    <table class="table table-bordered">
+    <table class="table table-bordered" style="color: white;">
         <thead>
             <tr>
                 <th>Transaction Date</th>

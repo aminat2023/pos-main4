@@ -39,7 +39,7 @@
                                     <tr>
                                         <th>Product Name</th>
                                         <th>Brand</th>
-                                        <th>Alert Stock</th>
+                                        <th>Total Stock</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -48,7 +48,7 @@
                                         <tr>
                                             <td>{{ $product->product_name }}</td>
                                             <td>{{ $product->brand }}</td>
-                                            <td>{{ $product->alert_stock }}</td>
+                                            <td>{{ $product->total_stock }}</td>
                                             <td>
                                                 <div class="btn-group">
                                                     <!-- View Details button -->
@@ -349,6 +349,103 @@
                 </div>
             </div>
         </div>
-
+      
+    
+        <style>
+            /* Card Styling */
+            .card {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                border: none;
+                border-radius: 6px;
+            }
+        
+            .card-header {
+                background-color: #343a40;
+                color: #ffffff;
+                font-weight: 600;
+                border-radius: 6px 6px 0 0;
+            }
+        
+            /* Table Styling */
+            .table th, .table td {
+                vertical-align: middle !important;
+                font-size: 14px;
+            }
+        
+            .table-hover tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+        
+            /* Modal Size */
+            .modal-dialog {
+                max-width: 700px;
+                margin: 1.75rem auto;
+            }
+        
+            @media (max-width: 768px) {
+                .modal-dialog {
+                    width: 65%;
+                   
+                }
+            }
+        
+            /* Modal Appearance */
+            .modal-header {
+                background-color: #f8f9fa;
+                border-bottom: 1px solid #dee2e6;
+                padding: 12px 20px;
+            }
+        
+            .modal-title {
+                font-weight: 600;
+                font-size: 18px;
+            }
+        
+            .modal-body {
+                padding: 20px;
+            }
+        
+            .modal-footer {
+                padding: 15px 20px;
+                background-color: #f1f1f1;
+                border-top: 1px solid #dee2e6;
+            }
+        
+            .form-control {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+        
+            /* Buttons */
+            .btn-sm {
+                padding: 5px 10px;
+                font-size: 13px;
+            }
+        
+            .btn-group .btn + .btn {
+                margin-left: 3px;
+            }
+        
+            .btn-primary, .btn-info, .btn-danger, .btn-dark {
+                border-radius: 4px;
+            }
+        
+            /* Alerts */
+            .alert {
+                font-size: 14px;
+            }
+        
+            /* Product Image */
+            .img-fluid {
+                max-width: 100%;
+                height: auto;
+                border-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        </style>
+   
+        
+    
+        
     </div>
 @endsection

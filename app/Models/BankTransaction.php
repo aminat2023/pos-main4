@@ -14,7 +14,6 @@ class BankTransaction extends Model
     protected $fillable = [
         'user_id',
         'amount',
-        'reference',
         'bank_name',
         'payment_method',
         'date',

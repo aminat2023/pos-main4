@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->enum('payment_method', ['cash', 'bank_transfer', 'credit_card']);
             $table->date('date');
+            $table->decimal('available_balance', 10, 2)->nullable()->after('total_amount');
             $table->timestamps();
         });
     }
@@ -31,5 +32,10 @@ return new class extends Migration
     public function down()
     {
         Schema::dropIfExists('till_collections');
+        Schema::table('till_withdrawals', function (Blueprint $table) {
+            $table->dropColumn('available_balance');
+        });
+        
     }
+  
 };

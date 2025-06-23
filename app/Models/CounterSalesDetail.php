@@ -9,11 +9,7 @@ class CounterSalesDetail extends Model
 {
     use HasFactory;
 
-    // Specify the table name if it doesn't follow Laravel's naming convention
     protected $table = 'counter_sales_details';
-
-    // Define the fillable attributes
-    use HasFactory;
 
     protected $fillable = [
         'user_id',
@@ -30,16 +26,21 @@ class CounterSalesDetail extends Model
         'discount',
     ];
 
-    // Define any relationships if needed
-    // For example, if you have a User model and want to link it
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class);
-    // }
+    // Relationship to User as cashier
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id'); // Use this in Blade: $sale->user->name
+    }
 
-    // // You can also define a relationship with a product model if applicable
-    // public function product()
-    // {
-    //     return $this->belongsTo(ProductTwo::class, 'product_code', 'code'); // Adjust 'code' to the actual field in your products table
-    // }
+    // Optional: If your table uses 'cashier_id' instead of 'user_id'
+    public function cashier()
+    {
+        return $this->belongsTo(User::class, 'cashier_id'); // Use this in Blade: $sale->cashier->name
+    }
+
+    // Relationship to product
+    public function product()
+    {
+        return $this->belongsTo(IncomingStock::class, 'product_code', 'product_code'); // adjust field if needed
+    }
 }

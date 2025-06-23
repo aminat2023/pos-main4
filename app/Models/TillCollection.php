@@ -10,5 +10,6 @@ class TillCollection extends Model
         'amount',
         'payment_method',
         'date',
+        'available_balance', 
     ];
 }

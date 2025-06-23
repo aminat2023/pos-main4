@@ -8,11 +8,13 @@
                     <div>
                         <h5 class="mb-0" style="font-weight: bold;">
                             TILL: ₦{{ number_format($this->tillTotal, 2) }}
+                            <h5 class="mb-0" style="font-weight: bold;">
+                                BANK: ₦{{ number_format($this->bankTotal, 2) }}
+                            </h5>
                         </h5>
                     </div>
                 </div>
-                
-            
+                           
                 <div class="card-body">
                     <form wire:submit.prevent="addSelectedProductToCart">
                         <div class="form-group my-2">
@@ -31,7 +33,7 @@
                     @if ($message)
                         <div class="alert alert-info mt-2">{{ $message }}</div>
                     @endif
-                    <table class="table table-bordered">
+                    <table class="table table-bordered table-hover table-sm m-0">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -259,95 +261,121 @@
 
 <style>
     .card {
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 10);
-        /* Box shadow effect */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         transition: box-shadow 0.3s ease;
-        /* Smooth transition for hover effect */
-        outline: none;
-        /* Remove outline */
-        border-radius: 5px;
-    }
-
-    .card-header {
-        box-shadow: 0 4px 8px rgba(20, 20, 20, 0.9);
-        /* Box shadow effect */
-        transition: box-shadow 0.3s ease;
-        /* Smooth transition for hover effect */
-        outline: none;
-        /* Remove outline */
-        border-radius: 20px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border: none;
     }
 
     .card:hover {
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.9);
-        /* Enhanced shadow on hover */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     }
 
+    .card-header {
+        background-color: #008B8B;
+        color: #ffffff;
+        font-weight: bold;
+        border-radius: 6px 6px 0 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.25rem;
+    }
 
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
 
     .quantity-btn {
         display: flex;
-        /* Use flexbox for centering */
         align-items: center;
-        /* Center vertically */
         justify-content: center;
-        /* Center horizontally */
-        width: 30px;
-        /* Set button width */
-        height: 30px;
-        /* Set button height */
+        width: 32px;
+        height: 32px;
         font-size: 18px;
-        /* Increase font size */
         border: none;
-        /* Remove border */
         color: #fff;
-        /* Text color */
-        background-color: inherit;
-        /* Keep background color same as parent */
+        background-color: #008B8B;
+        border-radius: 4px;
         transition: background-color 0.3s;
-        /* Smooth transition for background color */
         cursor: pointer;
-        /* Change cursor to pointer on hover */
     }
 
     .quantity-btn:hover {
-        opacity: 0.8;
-        /* Add hover effect */
+        opacity: 0.85;
     }
 
     .btn-success {
         background-color: #28a745;
-        /* Green background */
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        /* Red background */
     }
 
     .btn-success:hover {
         background-color: #218838;
-        /* Darker green on hover */
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
     }
 
     .btn-danger:hover {
         background-color: #c82333;
-        /* Darker red on hover */
     }
 
-    /* Flexbox styles for alignment */
-    .d-flex {
-        display: flex;
+    .btn-group .btn {
+        margin-right: 4px;
     }
 
-    .align-items-center {
-        align-items: center;
+    .total {
+        font-size: 26px;
+        font-weight: bold;
+        color: #ffffff;
     }
 
-    .justify-content-between {
-        justify-content: space-between;
+    .form-control {
+        font-size: 14px;
+    }
+
+    .radio-item {
+        display: inline-block;
+        margin-right: 15px;
+    }
+
+    .modal-content {
+        border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .card-header h4, .card-header h5, .total {
+            font-size: 18px;
+        }
+
+        .btn {
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .form-control {
+            font-size: 13px;
+        }
+
+        .table th,
+        .table td {
+            font-size: 12px;
+            padding: 0.4rem;
+        }
+
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+        }
     }
 </style>
+
 <script>
     function PrintReceiptContent(el) {
         var buttonHTML = `

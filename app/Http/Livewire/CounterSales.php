@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use App\Models\TillCollection;
+use App\Models\TillWithdrawal;
+use App\Models\BankTransaction;
+use Illuminate\Support\Str;
+
+
 
 class CounterSales extends Component
 {
@@ -28,6 +33,12 @@ class CounterSales extends Component
     public $newCash;
     public $tillTotal = 0;
     public $receiptTemplate = 'compact58mm';  // default fallback
+    public $bank_name;
+    public $reference;
+    public $bankTotal = 0;
+    
+
+    
 
     protected $listeners = ['cartUpdated' => 'refreshCart'];
 
@@ -41,8 +52,18 @@ class CounterSales extends Component
             ->where('key', 'receipt_template')
             ->value('value') ?? 'compact58mm';  // fallback
 
-            $this->tillTotal = TillCollection::whereDate('date', today())
+            $collected = TillCollection::whereDate('date', today())
             ->where('payment_method', 'cash')
+            ->sum('amount');
+        
+        $withdrawn =TillWithdrawal::whereDate('created_at', today())
+            ->sum('total_amount');
+        
+        $this->tillTotal = $collected - $withdrawn;
+        
+           
+            $this->bankTotal = BankTransaction::whereDate('date', today())
+            ->where('payment_method', 'bank_transfer')
             ->sum('amount');
     }
 
@@ -171,125 +192,112 @@ class CounterSales extends Component
         $this->orderItems = array_values($this->orderItems);
     }
 
-    // public function save(): void
-    // {
-    //     if (!$this->orderItems) {
-    //         $this->errorMessage = 'Cart is empty.';
-    //         return;
-    //     }
+    
 
-    //     DB::beginTransaction();
-    //     try {
-    //         /* We may touch multiple product codes; gather unique ones to refresh totals later */
-    //         $productsToRefresh = collect($this->orderItems)->pluck('product_code')->unique()->values();
 
-    //         foreach ($this->orderItems as $item) {
-    //             $batch = IncomingStock::where('id', $item['batch_id'])
-    //                 ->lockForUpdate()
-    //                 ->first();
 
-    //             if (!$batch || $batch->quantity < $item['quantity']) {
-    //                 throw new \Exception("Batch quantity changed for {$item['product_name']}.");
-    //             }
 
-    //             $batch->quantity -= $item['quantity'];
-    //             $batch->save();
+// public function save(): void
+// {
+//     if (!$this->orderItems) {
+//         $this->errorMessage = 'Cart is empty.';
+//         return;
+//     }
 
-    //             CounterSalesDetail::create([
-    //                 'user_id' => Auth::id(),
-    //                 'product_code' => $item['product_code'],
-    //                 'product_name' => $item['product_name'],
-    //                 'quantity' => $item['quantity'],
-    //                 'cost_price' => $item['cost_price'],
-    //                 'selling_price' => $item['selling_price'],
-    //                 'total_amount' => $item['total_amount'],
-    //                 'amount_paid' => $item['total_amount'],
-    //                 'balance' => 0,
-    //                 'method_of_payment' => 'Cash',
-    //                 'profit' => $item['profit'],
-    //             ]);
-    //         }
+//     DB::beginTransaction();
 
-    //         /* update total_stock for each product we touched */
-    //         foreach ($productsToRefresh as $code) {
-    //             $this->refreshTotalStock($code);
-    //         }
+//     try {
+//         $productsToRefresh = collect($this->orderItems)->pluck('product_code')->unique()->values();
+//         $totalCashAmount = 0;
+//         $totalBankAmount = 0;
 
-    //         DB::commit();
-    //         $this->orderItems = [];
-    //         $this->message = 'Sale saved and stock updated!';
-    //         $this->savedOrders = CounterSalesDetail::latest()->take(10)->get();
-    //     } catch (\Throwable $e) {
-    //         DB::rollBack();
-    //         Log::error('Save sale error: ' . $e->getMessage());
-    //         $this->errorMessage = 'Could not save sale.';
-    //     }
-    // }
+//         $method = strtolower($this->payment_method);
+//         $userId = Auth::id();
 
-    // public function save(): void
-    // {
-    //     if (!$this->orderItems) {
-    //         $this->errorMessage = 'Cart is empty.';
-    //         return;
-    //     }
-    
-    //     DB::beginTransaction();
-    //     try {
-    //         $productsToRefresh = collect($this->orderItems)->pluck('product_code')->unique()->values();
-    //         $totalCashAmount = 0;
-    
-    //         foreach ($this->orderItems as $item) {
-    //             $batch = IncomingStock::where('id', $item['batch_id'])
-    //                      ->lockForUpdate()->first();
-    
-    //             if (!$batch || $batch->quantity < $item['quantity']) {
-    //                 throw new \Exception("Batch quantity changed for {$item['product_name']}.");
-    //             }
-    
-    //             $batch->quantity -= $item['quantity'];
-    //             $batch->save();
-    
-    //             CounterSalesDetail::create([
-    //                 'user_id'           => Auth::id(),
-    //                 'product_code'      => $item['product_code'],
-    //                 'product_name'      => $item['product_name'],
-    //                 'quantity'          => $item['quantity'],
-    //                 'cost_price'        => $item['cost_price'],
-    //                 'selling_price'     => $item['selling_price'],
-    //                 'total_amount'      => $item['total_amount'],
-    //                 'amount_paid'       => $item['total_amount'],
-    //                 'balance'           => 0,
-    //                 'method_of_payment' => $this->payment_method,
-    //                 'profit'            => $item['profit'],
-    //             ]);
-    
-    //             // If payment is cash, accumulate amount
-    //             if (strtolower($this->payment_method) === 'cash') {
-    //                 $totalCashAmount += floatval($item['total_amount']);
-    //             }
-    //         }
-    
-    //         // Update the till only once after loop
-    //         if (strtolower($this->payment_method) === 'cash') {
-    //             $this->tillTotal += $totalCashAmount;
-    //         }
-    
-    //         foreach ($productsToRefresh as $code) {
-    //             $this->refreshTotalStock($code);
-    //         }
-    
-    //         DB::commit();
-    //         $this->orderItems  = [];
-    //         $this->message     = 'Sale saved and stock updated!';
-    //         $this->savedOrders = CounterSalesDetail::latest()->take(10)->get();
-    
-    //     } catch (\Throwable $e) {
-    //         DB::rollBack();
-    //         Log::error('Save sale error: ' . $e->getMessage());
-    //         $this->errorMessage = 'Could not save sale.';
-    //     }
-    // }
-    public function save(): void
+//         foreach ($this->orderItems as $item) {
+//             $batch = IncomingStock::where('id', $item['batch_id'])->lockForUpdate()->first();
+
+//             if (!$batch || $batch->quantity < $item['quantity']) {
+//                 throw new \Exception("Batch quantity changed for {$item['product_name']}.");
+//             }
+
+//             $batch->quantity -= $item['quantity'];
+//             $batch->save();
+
+//             // Save sales detail
+//             CounterSalesDetail::create([
+//                 'user_id'           => $userId,
+//                 'product_code'      => $item['product_code'],
+//                 'product_name'      => $item['product_name'],
+//                 'quantity'          => $item['quantity'],
+//                 'cost_price'        => $item['cost_price'],
+//                 'selling_price'     => $item['selling_price'],
+//                 'total_amount'      => $item['total_amount'],
+//                 'amount_paid'       => $item['total_amount'],
+//                 'balance'           => 0,
+//                 'method_of_payment' => $method,
+//                 'profit'            => $item['profit'],
+//             ]);
+
+//             // Accumulate totals
+//             if ($method === 'cash') {
+//                 $totalCashAmount += floatval($item['total_amount']);
+//             } elseif ($method === 'bank_transfer') {
+//                 $totalBankAmount += floatval($item['total_amount']);
+//             }
+//         }
+
+//         // Save Till Collection if cash
+//         if ($totalCashAmount > 0) {
+//             TillCollection::create([
+//                 'user_id'        => $userId,
+//                 'amount'         => round($totalCashAmount, 2),
+//                 'payment_method' => 'cash',
+//                 'date'           => now()->toDateString(),
+//             ]);
+//         }
+
+//         // Save Bank Transaction if bank_transfer
+//         if ($totalBankAmount > 0) {
+//             BankTransaction::create([
+//                 'user_id'        => $userId,
+//                 'amount'         => round($totalBankAmount, 2),
+//                 'payment_method' => 'bank_transfer',
+//                 'bank_name'      => $this->bank_name ?? 'N/A',
+//                 'reference'      => $this->reference ?? 'BANK-' . now()->timestamp,
+//                 'date'           => now()->toDateString(),
+//             ]);
+//         }
+
+//         // Refresh stock
+//         foreach ($productsToRefresh as $code) {
+//             $this->refreshTotalStock($code);
+//         }
+
+//         DB::commit();
+
+//         // Clear cart
+//         $this->orderItems = [];
+//         $this->message = 'Sale saved and stock updated!';
+//         $this->savedOrders = CounterSalesDetail::latest()->take(10)->get();
+
+//         // ✅ Compute TILL and BANK totals (persistent)
+//         $cashierId = Auth::id();
+
+//         $totalCollected = TillCollection::where('user_id', $cashierId)->sum('amount');
+//         $totalWithdrawn = \App\Models\TillWithdrawal::where('cashier_id', $cashierId)->sum('total_amount');
+
+//         $this->tillTotal = $totalCollected - $totalWithdrawn;
+
+//         $this->bankTotal = BankTransaction::where('user_id', $cashierId)->sum('amount');
+
+//     } catch (\Throwable $e) {
+//         DB::rollBack();
+//         $this->errorMessage = 'Could not save sale: ' . $e->getMessage();
+//     }
+// }
+
+public function save(): void
 {
     if (!$this->orderItems) {
         $this->errorMessage = 'Cart is empty.';
@@ -297,9 +305,14 @@ class CounterSales extends Component
     }
 
     DB::beginTransaction();
+
     try {
         $productsToRefresh = collect($this->orderItems)->pluck('product_code')->unique()->values();
         $totalCashAmount = 0;
+        $totalBankAmount = 0;
+
+        $method = strtolower($this->payment_method);
+        $userId = Auth::id();
 
         foreach ($this->orderItems as $item) {
             $batch = IncomingStock::where('id', $item['batch_id'])->lockForUpdate()->first();
@@ -311,8 +324,12 @@ class CounterSales extends Component
             $batch->quantity -= $item['quantity'];
             $batch->save();
 
+            // 🔸 Calculate profit for this item
+            $profit = ($item['selling_price'] - $item['cost_price']) * $item['quantity'];
+
+            // Save sales detail
             CounterSalesDetail::create([
-                'user_id'           => Auth::id(),
+                'user_id'           => $userId,
                 'product_code'      => $item['product_code'],
                 'product_name'      => $item['product_name'],
                 'quantity'          => $item['quantity'],
@@ -321,47 +338,71 @@ class CounterSales extends Component
                 'total_amount'      => $item['total_amount'],
                 'amount_paid'       => $item['total_amount'],
                 'balance'           => 0,
-                'method_of_payment' => $this->payment_method,
-                'profit'            => $item['profit'],
+                'method_of_payment' => $method,
+                'profit'            => $profit, // ✅ Profit stored
             ]);
 
-            // If payment is cash, add to total cash
-            if (strtolower($this->payment_method) === 'cash') {
+            // Accumulate totals
+            if ($method === 'cash') {
                 $totalCashAmount += floatval($item['total_amount']);
+            } elseif ($method === 'bank_transfer') {
+                $totalBankAmount += floatval($item['total_amount']);
             }
         }
 
-        // If payment is cash, insert into till_collections
+        // Save Till Collection if cash
         if ($totalCashAmount > 0) {
             TillCollection::create([
-                'user_id'        => Auth::id(),
+                'user_id'        => $userId,
                 'amount'         => round($totalCashAmount, 2),
                 'payment_method' => 'cash',
                 'date'           => now()->toDateString(),
             ]);
         }
 
-        // Update stock levels
+        // Save Bank Transaction if bank_transfer
+        if ($totalBankAmount > 0) {
+            BankTransaction::create([
+                'user_id'        => $userId,
+                'amount'         => round($totalBankAmount, 2),
+                'payment_method' => 'bank_transfer',
+                'bank_name'      => $this->bank_name ?? 'N/A',
+                'reference'      => $this->reference ?? 'BANK-' . now()->timestamp,
+                'date'           => now()->toDateString(),
+            ]);
+        }
+
+        // Refresh stock
         foreach ($productsToRefresh as $code) {
             $this->refreshTotalStock($code);
         }
 
         DB::commit();
 
-        // Clear the cart
+        // Clear cart
         $this->orderItems = [];
         $this->message = 'Sale saved and stock updated!';
         $this->savedOrders = CounterSalesDetail::latest()->take(10)->get();
 
-        // Refresh tillTotal for today
-        $this->tillTotal = TillCollection::whereDate('date', today())
-                                         ->where('payment_method', 'cash')
-                                         ->sum('amount');
+        // ✅ Update Till & Bank totals
+        $cashierId = Auth::id();
+
+        $totalCollected = TillCollection::where('user_id', $cashierId)->sum('amount');
+        $totalWithdrawn = \App\Models\TillWithdrawal::where('cashier_id', $cashierId)->sum('total_amount');
+
+        $this->tillTotal = $totalCollected - $totalWithdrawn;
+
+        $this->bankTotal = BankTransaction::where('user_id', $cashierId)->sum('amount');
+
     } catch (\Throwable $e) {
         DB::rollBack();
         $this->errorMessage = 'Could not save sale: ' . $e->getMessage();
     }
 }
+
+
+
+
 
 
 

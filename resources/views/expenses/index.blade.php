@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" style="color: aliceblue">
-    <div class="card bg-dark text-white">
+<div class="container min-vh-100 d-flex justify-content-center align-items-center">
+    <div class="card bg-dark text-white shadow" style="width: 100%; max-width: 500px;">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Expense Records</h4>
             <button type="button" class="close text-white" onclick="this.closest('.card').remove();" aria-label="Close" style="font-size: 1.5rem;">
@@ -10,12 +10,15 @@
             </button>
         </div>
 
-        <div class="card-body">
-            <h5>Total Expenses: ₦{{ number_format($totalExpenses, 2) }}</h5>
+        <div class="card-body text-center">
+            <h5>Total Expenses:</h5>
+            <h3 class="text-danger mb-3">₦{{ number_format($totalExpenses, 2) }}</h3>
 
-            <a href="{{ route('expenses.create') }}" class="btn btn-primary mb-3">Register Expense</a>
+            <a href="{{ route('expenses.create') }}" class="btn btn-primary btn-block mb-3">
+                Register New Expenses
+            </a>
 
-            <div class="table-responsive">
+            {{-- <div class="table-responsive">
                 <table class="table table-bordered table-striped text-white">
                     <thead>
                         <tr>
@@ -38,7 +41,7 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
+            </div> --}}
         </div>
     </div>
 </div>

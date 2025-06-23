@@ -195,6 +195,7 @@ class ProductTwoController extends Controller
 
         return back()->with('success', 'Incoming stock added successfully.');
     }
+    
 
     /* --------------------------------------------------------------------
      | HELPER : Delete old image
@@ -206,4 +207,8 @@ class ProductTwoController extends Controller
             if (file_exists($path)) unlink($path);
         }
     }
+
+
+
+    
 }

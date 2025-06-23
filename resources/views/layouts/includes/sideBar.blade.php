@@ -20,6 +20,17 @@
             <a href="{{ route('sub_categories.index') }}"><i class="fa fa-list-alt"></i> Sub Categories</a>
         </li>
 
+        <li>        <a href="{{ route('till.withdraw.create') }}"><i class="fa fa-list-alt"></i>Withdraw Till</a>
+        </li>
+
+        <li>
+            <a href="{{ route('daily_sales.index') }}">
+                <i class="fa fa-history"></i> History
+            </a>
+        </li>
+        
+
+
         <!-- Settings Dropdown -->
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#settingsCollapse" role="button">
