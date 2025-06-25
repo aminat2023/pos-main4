@@ -44,8 +44,13 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="product_name" class="form-label">Product Name</label>
-                    <input type="text" name="product_name" class="form-control" required>
+                    <label for="product_name" class="form-label">Product</label>
+                    <select name="product_name" id="product_name" class="form-select form-control" required>
+                        <option value="">Select Product</option>
+                        @foreach($products as $product)
+                            <option value="{{ $product->product_name }}">{{ $product->product_name }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="mb-3">
@@ -61,6 +66,8 @@
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn" style="background-color: teal; color:white;">Record Supply</button>
                 </div>
+                {{-- <input type="text" class="form-control" value="{{ $supply->supply_id }}" disabled> --}}
+
             </form>
         </div>
     </div>

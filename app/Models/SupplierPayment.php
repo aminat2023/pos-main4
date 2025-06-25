@@ -9,11 +9,18 @@ class SupplierPayment extends Model
 {
     use HasFactory;
 
+    // app/Models/SupplierPayment.php
 
-    public function supplier() {
-        return $this->belongsTo(Supplier::class);
+    protected $fillable = [
+        'supply_id',
+        'amount_paid',
+        'balance',
+        'payment_mode',
+    ];
+
+    // Relationship to supply
+    public function supply()
+    {
+        return $this->belongsTo(Supply::class);
     }
-
-
-    
 }

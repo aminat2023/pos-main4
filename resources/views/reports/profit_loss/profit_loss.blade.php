@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="container mt-4" style="background-color: aliceblue">
+    
     <h4 class="mb-4">📊 Profit & Loss Report</h4>
 
     <form method="GET" action="{{ route('profit_loss.index') }}" class="row mb-4">

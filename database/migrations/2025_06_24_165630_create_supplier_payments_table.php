@@ -16,14 +16,15 @@ return new class extends Migration
         Schema::create('supplier_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
-            $table->decimal('amount_paid', 10, 2);
-            $table->string('payment_method'); // e.g., cash, transfer, bank
-            $table->date('payment_date');
+            $table->string('product_name');
+            $table->integer('quantity');
+            $table->decimal('amount', 12, 2);
+            $table->string('payment_mode')->nullable(); ; // e.g. cash, bank
+            $table->string('invoice_number')->unique();
             $table->timestamps();
         });
-        
     }
-
+    
     /**
      * Reverse the migrations.
      *

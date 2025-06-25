@@ -33,7 +33,19 @@
                         Supplied Goods</a>
                     <hr>
                     <a class="dropdown-item" href="{{ route('supplies.index') }}"><i class="fa fa-list"></i> Goods
-                        Supplied</a>
+                        Supplied
+                    </a>
+                    {{-- <li class="nav-item">
+                        <a class="nav-link" href="{{ route('supplier_payments.create',$supply->id) }}">
+                            <i class="fas fa-file-invoice-dollar"></i> Supplier Payments
+                        </a>
+                    </li>
+
+                    <a href="{{ route('supplier_payments.create', $supply->id) }}">Make Payment</a> --}}
+
+
+                    
+                        
                 </div>
             </div>
 
@@ -59,11 +71,16 @@
                     <a class="dropdown-item" href="{{ route('profit_loss.index') }}">
                         <i class="fa fa-file-invoice-dollar"></i> Profit/Loss Report
                     </a>
-                   
-                        <a class="nav-link {{ request()->is('profit-report') ? 'active' : '' }}" href="{{ route('profit.report.index') }}">
+                    <br>
+                        <a class="dropdown-item" {{ request()->is('profit-report') ? 'active' : '' }}" href="{{ route('profit.report.index') }}">
                             📈 Profit Report
                         </a>
-                   
+                   <br>
+                    <a class="dropdown-item" href="{{ route('incoming_stock.report.index') }}">
+                        📦 Incoming Stock Report
+                    </a>
+                
+                
                 </div>
             </div>
 

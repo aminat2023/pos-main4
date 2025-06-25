@@ -13,15 +13,15 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::table('till_withdrawals', function (Blueprint $table) {
-        $table->decimal('available_balance', 10, 2)->nullable()->after('total_amount');
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('phone')->nullable(); // Add phone number
     });
 }
 
 public function down()
 {
-    Schema::table('till_withdrawals', function (Blueprint $table) {
-        $table->dropColumn('available_balance');
+    Schema::table('users', function (Blueprint $table) {
+        $table->dropColumn('phone');
     });
 }
 

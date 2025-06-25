@@ -10,7 +10,7 @@
             </button>
         </div>
 
-        <div class="card-body">
+        {{-- <div class="card-body">
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
@@ -31,7 +31,7 @@
                         @foreach ($supplies as $supply)
                         <tr>
                             <td>{{ $supply->supplier->name ?? 'N/A' }}</td>
-                            <td>{{ $supply->product->product_name ?? 'N/A' }}</td>
+                            <td>{{ $supply->product_name }}</td>
                             <td>{{ $supply->quantity }}</td>
                             <td>₦{{ number_format($supply->amount, 2) }}</td>
                             <td>{{ ucfirst($supply->payment_mode) }}</td>
@@ -41,6 +41,42 @@
                     </tbody>
                 </table>
             </div>
+        </div> --}}
+
+        <div class="card-body">
+            @if(session('supply_created'))
+    <div class="alert alert-success">
+        Supply recorded. <a href="{{ route('supplier_payments.create', session('supply_created')) }}" class="btn btn-sm btn-success ml-2">Proceed to Payment</a>
+    </div>
+@endif
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Supplier</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Amount</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($supplies as $supply)
+        <tr>
+            <td>{{ $supply->supplier->name ?? 'Anonymous' }}</td>
+            <td>{{ $supply->product_name }}</td>
+            <td>{{ $supply->quantity }}</td>
+            <td>₦{{ number_format($supply->amount, 2) }}</td>
+            <td>
+                <a href="{{ route('supplier_payments.create', $supply->id) }}" class="btn btn-sm btn-primary">
+                    Make Payment
+                </a>
+            </td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+
         </div>
     </div>
 </div>

@@ -44,6 +44,12 @@
                 </ul>
             </div>
         </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('user-activity-logs') ? 'active' : '' }}" href="{{ route('user.activity.logs') }}">
+                🕵️ Activity Logs
+            </a>
+        </li>
+        
     </ul>
 </nav>
 

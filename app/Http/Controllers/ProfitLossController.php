@@ -20,6 +20,32 @@ class ProfitLossController extends Controller
         $from = $request->input('from_date', now()->startOfMonth()->toDateString());
         $to = $request->input('to_date', now()->toDateString());
 
+        $report = self::generateReport($from, $to);
+
+        return view('reports.profit_loss.report', compact('report', 'from', 'to'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $from = $request->input('from_date', now()->startOfMonth()->toDateString());
+        $to = $request->input('to_date', now()->toDateString());
+
+        $report = self::generateReport($from, $to);
+
+        $pdf = Pdf::loadView('reports.profit_loss.profit_loss_pdf', compact('report', 'from', 'to'));
+        return $pdf->download('profit_loss_report.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $from = $request->input('from_date', now()->startOfMonth()->toDateString());
+        $to = $request->input('to_date', now()->toDateString());
+
+        return Excel::download(new \App\Exports\ProfitLossExport($from, $to), 'profit_loss_report.xlsx');
+    }
+
+    public static function generateReport($from, $to)
+    {
         $sales = CounterSalesDetail::whereBetween('created_at', [$from, $to])->get();
         $expenses = Expense::whereBetween('created_at', [$from, $to])->get();
 
@@ -45,27 +71,8 @@ class ProfitLossController extends Controller
 
         usort($report, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
 
-        return view('reports.profit_loss.report', compact('report', 'from', 'to'));
+        return $report;
     }
 
-    public function exportPdf(Request $request)
-{
-    $from = $request->query('from');
-    $to = $request->query('to');
-    $report = $this->generateReport($from, $to); // assume you have a helper method
-
-    $pdf = Pdf::loadView('reports.profit-loss-pdf', compact('report', 'from', 'to'))
-              ->setPaper('a4', 'portrait');
-
-    return $pdf->download('profit_loss_report.pdf');
+    
 }
-
-public function exportExcel(Request $request)
-{
-    $from = $request->query('from');
-    $to = $request->query('to');
-
-    return Excel::download(new ProfitLossExport($from, $to), 'profit_loss_report.xlsx');
-}
-}
-

@@ -42,4 +42,7 @@ class LoginController extends Controller
         // Default redirect if no role matches
         return redirect('/home');
     }
+
+
+    
 }

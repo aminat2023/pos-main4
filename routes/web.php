@@ -17,6 +17,10 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ExpenseReportController;
 use App\Http\Controllers\ProfitLossController;
 use App\Http\Controllers\ProfitReportController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\IncomingStockReportController;
+use App\Http\Controllers\SupplierPaymentController;
+
 
 Route::prefix('profit-report')->group(function () {
     Route::get('/', [ProfitReportController::class, 'index'])->name('profit.report.index');
@@ -24,10 +28,14 @@ Route::prefix('profit-report')->group(function () {
 });
 
 
+
+
 // Home
 Route::get('/', fn() => view('welcome'));
 Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::post('login', [LoginController::class, 'login']);
 
 // Admin Routes Only
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -59,6 +67,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('orders', App\Http\Controllers\OrderController::class);
     // Barcode
     Route::get('barcode', [App\Http\Controllers\ProductsController::class, 'GetProductBarcodes'])->name('products.barcode');
+
+
+    // routes/web.php
+    Route::get('/activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])->middleware('auth');
+    Route::get('/user-activity-logs', [App\Http\Controllers\ActivityLogController::class, 'index'])
+    ->middleware('auth')
+    ->name('user.activity.logs');
 
     // Supplies
     Route::get('/supplies/create', [SupplyController::class, 'create'])->name('supplies.create');
@@ -110,19 +125,55 @@ Route::get('/profit-loss/export/pdf', [ProfitLossController::class, 'exportPdf']
 Route::get('/profit-loss/export/excel', [ProfitLossController::class, 'exportExcel'])->name('profit_loss.excel');
 
 
+Route::get('/profit-loss/report', [ProfitLossController::class, 'print'])->name('profit_loss.print');
+Route::get('/profit-loss/print', [ProfitLossController::class, 'print'])->name('profit_loss.print');
+Route::get('/profit-loss/generate', [ProfitLossController::class, 'generate'])->name('profit_loss.generate');
+Route::get('/profit-loss/export/pdf', [ProfitLossController::class, 'exportPdf'])->name('profit_loss.pdf');
+Route::get('/profit-loss/export/excel', [ProfitLossController::class, 'exportExcel'])->name('profit_loss.excel');
+
+Route::get('/profit-loss/export/pdf', [ProfitLossController::class, 'exportPdf'])->name('profit_loss.exportPdf');
+Route::get('/profit-loss/export/excel', [ProfitLossController::class, 'exportExcel'])->name('profit_loss.exportExcel');
+
+
+Route::get('reports/profit', [ProfitReportController::class, 'index'])->name('profit.index');
+Route::get('reports/profit/print', [ProfitReportController::class, 'print'])->name('profit.print');
+Route::get('reports/profit/pdf', [ProfitReportController::class, 'exportPdf'])->name('profit.exportPdf');
+Route::get('reports/profit/excel', [ProfitReportController::class, 'exportExcel'])->name('profit.exportExcel');
+
 Route::get('/reports/profit', [ProfitReportController::class, 'index'])->name('profit.report.index');
 Route::get('/reports/profit/print', [ProfitReportController::class, 'print'])->name('profit.report.print');
 
 
-Route::get('/profit-loss/report', [ProfitLossController::class, 'print'])->name('profit_loss.print');
-
-Route::get('/profit-loss/print', [ProfitLossController::class, 'print'])->name('profit_loss.print');
-Route::get('/profit-loss/generate', [ProfitLossController::class, 'generate'])->name('profit_loss.generate');
 
 
 
+Route::get('/incoming-stock-report', [IncomingStockReportController::class, 'index'])->name('incoming_stock.report.index');
+Route::get('/incoming-stock-report/print', [IncomingStockReportController::class, 'print'])->name('incoming_stock.report.print');
 
 });
+Route::get('reports/incoming-stock', [IncomingStockReportController::class, 'index'])->name('incoming_stock.report.index');
+Route::get('reports/incoming-stock/print', [IncomingStockReportController::class, 'print'])->name('incoming_stock.report.print');
+Route::get('reports/incoming-stock/pdf', [IncomingStockReportController::class, 'exportPdf'])->name('incoming_stock.report.pdf');
+Route::get('reports/incoming-stock/excel', [IncomingStockReportController::class, 'exportExcel'])->name('incoming_stock.report.excel');
+
+
+Route::prefix('supplier-payments')->name('supplier_payments.')->group(function () {
+    Route::get('create', [SupplierPaymentController::class, 'create'])->name('create');
+    Route::post('store', [SupplierPaymentController::class, 'store'])->name('store');
+    Route::get('invoice/{id}', [SupplierPaymentController::class, 'showInvoice'])->name('invoice');
+});
+
+// Route::get('/supplier-payments/create', [SupplierPaymentController::class, 'create'])->name('supplier_payments.create');
+// Route::get('/supplier-payments/create', [SupplierPaymentController::class, 'create'])->name('supplier_payments.create');
+Route::post('/supplier-payments/store', [SupplierPaymentController::class, 'store'])->name('supplier_payments.store');
+Route::get('/supplier-payments/invoice/{supply_id}', [SupplierPaymentController::class, 'invoice'])->name('supplier_payments.invoice');
+
+Route::get('/supplier-payments/create/{supply_id}', [SupplierPaymentController::class, 'create'])->name('supplier_payments.create');
+
+
+
+
+
 
 // Cashier Routes Only
 Route::middleware(['auth', 'cashier'])->group(function () {
