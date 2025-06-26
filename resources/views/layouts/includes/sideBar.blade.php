@@ -49,6 +49,13 @@
                 🕵️ Activity Logs
             </a>
         </li>
+
+
+        <li class="{{ request()->is('journal*') ? 'active' : '' }}">
+            <a href="{{ route('journal.index') }}">
+                <i class="fa fa-book"></i> Journal Entries
+            </a>
+        </li>
         
     </ul>
 </nav>

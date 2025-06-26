@@ -2,9 +2,10 @@
     <div class="row">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center" style="background:#008B8B; color:#ffff;">
+                <div class="card-header d-flex justify-content-between align-items-center"
+                    style="background:#008B8B; color:#ffff;">
                     <h4 class="mb-0">PAYMENT</h4>
-                    
+
                     <div>
                         <h5 class="mb-0" style="font-weight: bold;">
                             TILL: ₦{{ number_format($this->tillTotal, 2) }}
@@ -14,7 +15,7 @@
                         </h5>
                     </div>
                 </div>
-                           
+
                 <div class="card-body">
                     <form wire:submit.prevent="addSelectedProductToCart">
                         <div class="form-group my-2">
@@ -54,23 +55,23 @@
                         <tbody class="addMoreProduct">
                             @foreach ($orderItems as $index => $item)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>  
+                                    <td>{{ $loop->iteration }}</td>
 
                                     <td>{{ $item['product_name'] }}</td>
-                                    
+
                                     <td width="15%">
                                         <div class="d-flex align-items-center justify-content-between">
                                             <button class="btn btn-sm btn-success quantity-btn"
-                                                    wire:click.prevent="incrementQty({{ $index }})"
-                                                    @if($item['quantity'] >= $item['max_quantity']) disabled @endif>
+                                                wire:click.prevent="incrementQty({{ $index }})"
+                                                @if ($item['quantity'] >= $item['max_quantity']) disabled @endif>
                                                 +
                                             </button>
-                                        
+
                                             <label for="" class="mx-2">{{ $item['quantity'] ?? 0 }}</label>
                                             <button class="btn btn-sm btn-danger quantity-btn"
-                                                    wire:click.prevent="decrementQty({{ $index }})">-</button>
+                                                wire:click.prevent="decrementQty({{ $index }})">-</button>
                                         </div>
-                                        
+
                                     </td>
                                     <td>
                                         <input type="number" name="selling_price[]"
@@ -153,20 +154,37 @@
                             <!-- Payment Section -->
                             <div class="payment-section" style="display: inline-block; text-align: left;">
                                 <h5>Payment</h5>
+                            
+                                <!-- Cash -->
                                 <div class="radio-item">
-                                    <input type="radio" id="payment_method_cash"
-                                     value="cash" 
-                                     wire:model="payment_method">
+                                    <input type="radio" id="payment_method_cash" value="cash" wire:model="payment_method">
                                     <label for="payment_method_cash">
                                         <i class="fa fa-money-bill text-success"></i> Cash
                                     </label>
                                 </div>
+                            
+                                <!-- Bank Transfer -->
                                 <div class="radio-item">
                                     <input type="radio" id="payment_method_bank" value="bank_transfer" wire:model="payment_method">
                                     <label for="payment_method_bank">
                                         <i class="fa fa-university text-danger"></i> Bank Transfer
                                     </label>
+                            
+                                    {{-- Show select only when bank_transfer is selected --}}
+                                    @if ($payment_method === 'bank_transfer')
+                                        <select id="bank_select" wire:model="selected_bank" class="form-control mt-2">
+                                            <option value="">Select a bank</option>
+                                            @php
+                                                $banks = json_decode(getPreference('banks', '[]'), true);
+                                            @endphp
+                                            @foreach ($banks as $bank)
+                                                <option value="{{ $bank }}">{{ $bank }}</option>
+                                            @endforeach
+                                        </select>
+                                    @endif
                                 </div>
+                            
+                                <!-- Credit Card -->
                                 <div class="radio-item">
                                     <input type="radio" id="payment_method_card" value="credit_card" wire:model="payment_method">
                                     <label for="payment_method_card">
@@ -189,33 +207,38 @@
 
                     <!-- Action Buttons -->
                     <div style="display: inline-block; width: 100%;">
-                        @if($errorMessage)
-                        <div class="alert alert-danger">
-                            {{ $errorMessage }}
-                        </div>
-                    @endif
-                
-                    <button wire:click="save" type="submit" class="btn btn-primary btn-lg btn-block mb-2">Save</button>
+                        @if ($errorMessage)
+                            <div class="alert alert-danger">
+                                {{ $errorMessage }}
+                            </div>
+                        @endif
+
+                        <button wire:click="save" type="submit"
+                            class="btn btn-primary btn-lg btn-block mb-2">Save</button>
                         <button type="button" class="btn btn-danger btn-lg btn-block">Calculate</button>
                     </div>
                     <div>
-                 
 
-                    <div class="text-center mt-3" style="display: inline-block; width: 100%;">
-                        <a href="#" class="text-danger"><i class="fa fa-sign-out-alt"></i></a>
-                    </div>
+
+                        <div class="text-center mt-3" style="display: inline-block; width: 100%;">
+                            <a href="#" class="text-danger"><i class="fa fa-sign-out-alt"></i></a>
+                        </div>
                 </form>
 
                 <div class="modal">
                     <div id="print">
-                        @includeIf('receipts.' . $receiptTemplate, ['orderItems' => $orderItems, 'pay_money' => $pay_money, 'balance' => $balance])
+                        @includeIf('receipts.' . $receiptTemplate, [
+                            'orderItems' => $orderItems,
+                            'pay_money' => $pay_money,
+                            'balance' => $balance,
+                        ])
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-@if(!empty($orderItems))
+@if (!empty($orderItems))
     <table class="table table-bordered w-full text-sm">
         <thead class="bg-gray-100">
             <tr>
@@ -285,7 +308,8 @@
         overflow-x: auto;
     }
 
-    .table th, .table td {
+    .table th,
+    .table td {
         vertical-align: middle;
         white-space: nowrap;
     }
@@ -349,7 +373,10 @@
     }
 
     @media (max-width: 768px) {
-        .card-header h4, .card-header h5, .total {
+
+        .card-header h4,
+        .card-header h5,
+        .total {
             font-size: 18px;
         }
 
@@ -406,5 +433,4 @@
     $(document).on('click', '.add_more', function() {
         alert('1');
     });
-
 </script>

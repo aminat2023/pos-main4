@@ -37,12 +37,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Destination:</label>
-                    <select name="destination" class="form-control">
-                        <option value="bank">Bank</option>
+                    <label>Destination (Bank or Vault):</label>
+                    <select name="destination" class="form-control" required>
+                        <option value="">-- Select Destination --</option>
+                
+                        @php
+                            $banks = json_decode(getPreference('banks', '[]'), true);
+                        @endphp
+                
+                        @if(is_array($banks))
+                            @foreach($banks as $bank)
+                                <option value="{{ $bank }}">{{ $bank }}</option>
+                            @endforeach
+                        @endif
+                
                         <option value="vault">Vault</option>
                     </select>
                 </div>
+                
 
                 <div class="form-group">
                     <label>Denominations:</label>

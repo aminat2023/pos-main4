@@ -20,6 +20,8 @@ use App\Http\Controllers\ProfitReportController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\IncomingStockReportController;
 use App\Http\Controllers\SupplierPaymentController;
+use App\Http\Controllers\VaultTransactionController;
+use App\Http\Controllers\JournalEntryController;
 
 
 Route::prefix('profit-report')->group(function () {
@@ -171,6 +173,22 @@ Route::get('/supplier-payments/invoice/{supply_id}', [SupplierPaymentController:
 Route::get('/supplier-payments/create/{supply_id}', [SupplierPaymentController::class, 'create'])->name('supplier_payments.create');
 
 
+Route::middleware(['auth'])->prefix('vault')->group(function () {
+    Route::get('in', [VaultTransactionController::class, 'showVaultInForm'])->name('vault.in');
+    Route::get('out', [VaultTransactionController::class, 'showVaultOutForm'])->name('vault.out');
+    Route::post('store', [VaultTransactionController::class, 'store'])->name('vault.store');
+});
+Route::get('/vault/report', [VaultTransactionController::class, 'report'])->name('vault.report');
+
+
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/journal', [JournalEntryController::class, 'index'])->name('journal.index');
+    Route::get('/journal/create', [JournalEntryController::class, 'create'])->name('journal.create');
+    Route::post('/journal/store', [JournalEntryController::class, 'store'])->name('journal.store');
+  
+});
 
 
 

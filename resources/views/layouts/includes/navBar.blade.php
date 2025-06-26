@@ -43,6 +43,18 @@
 
                     <a href="{{ route('supplier_payments.create', $supply->id) }}">Make Payment</a> --}}
 
+                
+                        <a class="nav-link" href="{{ route('vault.in') }}">
+                            <i class="fa fa-arrow-down text-success"></i> Vault In
+                        </a>
+                   
+                    
+                    
+                        <a class="nav-link" href="{{ route('vault.out') }}">
+                            <i class="fa fa-arrow-up text-danger"></i> Vault Out
+                        </a>
+                    
+                    
 
                     
                         
@@ -79,7 +91,10 @@
                     <a class="dropdown-item" href="{{ route('incoming_stock.report.index') }}">
                         📦 Incoming Stock Report
                     </a>
-                
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('vault.report') }}">Vault Report</a>
+                    </li>
+                    
                 
                 </div>
             </div>

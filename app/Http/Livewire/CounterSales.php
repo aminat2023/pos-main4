@@ -2,20 +2,18 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\BankTransaction;
 use App\Models\CounterSalesDetail;
 use App\Models\IncomingStock;
 use App\Models\ProductTwo;
+use App\Models\TillCollection;
+use App\Models\TillWithdrawal;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Livewire\Component;
-use App\Models\TillCollection;
-use App\Models\TillWithdrawal;
-use App\Models\BankTransaction;
 use Illuminate\Support\Str;
-
-
+use Livewire\Component;
 
 class CounterSales extends Component
 {
@@ -36,9 +34,7 @@ class CounterSales extends Component
     public $bank_name;
     public $reference;
     public $bankTotal = 0;
-    
-
-    
+    public $selected_bank = '';  // ✅ Add this line
 
     protected $listeners = ['cartUpdated' => 'refreshCart'];
 
@@ -52,17 +48,16 @@ class CounterSales extends Component
             ->where('key', 'receipt_template')
             ->value('value') ?? 'compact58mm';  // fallback
 
-            $collected = TillCollection::whereDate('date', today())
+        $collected = TillCollection::whereDate('date', today())
             ->where('payment_method', 'cash')
             ->sum('amount');
-        
-        $withdrawn =TillWithdrawal::whereDate('created_at', today())
+
+        $withdrawn = TillWithdrawal::whereDate('created_at', today())
             ->sum('total_amount');
-        
+
         $this->tillTotal = $collected - $withdrawn;
-        
-           
-            $this->bankTotal = BankTransaction::whereDate('date', today())
+
+        $this->bankTotal = BankTransaction::whereDate('date', today())
             ->where('payment_method', 'bank_transfer')
             ->sum('amount');
     }
@@ -192,219 +187,109 @@ class CounterSales extends Component
         $this->orderItems = array_values($this->orderItems);
     }
 
-    
+    public function save(): void
+    {
+        if (!$this->orderItems) {
+            $this->errorMessage = 'Cart is empty.';
+            return;
+        }
 
+        DB::beginTransaction();
 
+        try {
+            $productsToRefresh = collect($this->orderItems)->pluck('product_code')->unique()->values();
+            $totalCashAmount = 0;
+            $totalBankAmount = 0;
 
+            $method = strtolower($this->payment_method);
+            $userId = Auth::id();
 
-// public function save(): void
-// {
-//     if (!$this->orderItems) {
-//         $this->errorMessage = 'Cart is empty.';
-//         return;
-//     }
+            foreach ($this->orderItems as $item) {
+                $batch = IncomingStock::where('id', $item['batch_id'])->lockForUpdate()->first();
 
-//     DB::beginTransaction();
+                if (!$batch || $batch->quantity < $item['quantity']) {
+                    throw new \Exception("Batch quantity changed for {$item['product_name']}.");
+                }
 
-//     try {
-//         $productsToRefresh = collect($this->orderItems)->pluck('product_code')->unique()->values();
-//         $totalCashAmount = 0;
-//         $totalBankAmount = 0;
+                $batch->quantity -= $item['quantity'];
+                $batch->save();
 
-//         $method = strtolower($this->payment_method);
-//         $userId = Auth::id();
+                // 🔸 Calculate profit for this item
+                $profit = ($item['selling_price'] - $item['cost_price']) * $item['quantity'];
 
-//         foreach ($this->orderItems as $item) {
-//             $batch = IncomingStock::where('id', $item['batch_id'])->lockForUpdate()->first();
+                // Save sales detail
+                CounterSalesDetail::create([
+                    'user_id' => $userId,
+                    'product_code' => $item['product_code'],
+                    'product_name' => $item['product_name'],
+                    'quantity' => $item['quantity'],
+                    'cost_price' => $item['cost_price'],
+                    'selling_price' => $item['selling_price'],
+                    'total_amount' => $item['total_amount'],
+                    'amount_paid' => $item['total_amount'],
+                    'balance' => 0,
+                    'method_of_payment' => $method,
+                    'profit' => $profit,  // ✅ Profit stored
+                ]);
 
-//             if (!$batch || $batch->quantity < $item['quantity']) {
-//                 throw new \Exception("Batch quantity changed for {$item['product_name']}.");
-//             }
-
-//             $batch->quantity -= $item['quantity'];
-//             $batch->save();
-
-//             // Save sales detail
-//             CounterSalesDetail::create([
-//                 'user_id'           => $userId,
-//                 'product_code'      => $item['product_code'],
-//                 'product_name'      => $item['product_name'],
-//                 'quantity'          => $item['quantity'],
-//                 'cost_price'        => $item['cost_price'],
-//                 'selling_price'     => $item['selling_price'],
-//                 'total_amount'      => $item['total_amount'],
-//                 'amount_paid'       => $item['total_amount'],
-//                 'balance'           => 0,
-//                 'method_of_payment' => $method,
-//                 'profit'            => $item['profit'],
-//             ]);
-
-//             // Accumulate totals
-//             if ($method === 'cash') {
-//                 $totalCashAmount += floatval($item['total_amount']);
-//             } elseif ($method === 'bank_transfer') {
-//                 $totalBankAmount += floatval($item['total_amount']);
-//             }
-//         }
-
-//         // Save Till Collection if cash
-//         if ($totalCashAmount > 0) {
-//             TillCollection::create([
-//                 'user_id'        => $userId,
-//                 'amount'         => round($totalCashAmount, 2),
-//                 'payment_method' => 'cash',
-//                 'date'           => now()->toDateString(),
-//             ]);
-//         }
-
-//         // Save Bank Transaction if bank_transfer
-//         if ($totalBankAmount > 0) {
-//             BankTransaction::create([
-//                 'user_id'        => $userId,
-//                 'amount'         => round($totalBankAmount, 2),
-//                 'payment_method' => 'bank_transfer',
-//                 'bank_name'      => $this->bank_name ?? 'N/A',
-//                 'reference'      => $this->reference ?? 'BANK-' . now()->timestamp,
-//                 'date'           => now()->toDateString(),
-//             ]);
-//         }
-
-//         // Refresh stock
-//         foreach ($productsToRefresh as $code) {
-//             $this->refreshTotalStock($code);
-//         }
-
-//         DB::commit();
-
-//         // Clear cart
-//         $this->orderItems = [];
-//         $this->message = 'Sale saved and stock updated!';
-//         $this->savedOrders = CounterSalesDetail::latest()->take(10)->get();
-
-//         // ✅ Compute TILL and BANK totals (persistent)
-//         $cashierId = Auth::id();
-
-//         $totalCollected = TillCollection::where('user_id', $cashierId)->sum('amount');
-//         $totalWithdrawn = \App\Models\TillWithdrawal::where('cashier_id', $cashierId)->sum('total_amount');
-
-//         $this->tillTotal = $totalCollected - $totalWithdrawn;
-
-//         $this->bankTotal = BankTransaction::where('user_id', $cashierId)->sum('amount');
-
-//     } catch (\Throwable $e) {
-//         DB::rollBack();
-//         $this->errorMessage = 'Could not save sale: ' . $e->getMessage();
-//     }
-// }
-
-public function save(): void
-{
-    if (!$this->orderItems) {
-        $this->errorMessage = 'Cart is empty.';
-        return;
-    }
-
-    DB::beginTransaction();
-
-    try {
-        $productsToRefresh = collect($this->orderItems)->pluck('product_code')->unique()->values();
-        $totalCashAmount = 0;
-        $totalBankAmount = 0;
-
-        $method = strtolower($this->payment_method);
-        $userId = Auth::id();
-
-        foreach ($this->orderItems as $item) {
-            $batch = IncomingStock::where('id', $item['batch_id'])->lockForUpdate()->first();
-
-            if (!$batch || $batch->quantity < $item['quantity']) {
-                throw new \Exception("Batch quantity changed for {$item['product_name']}.");
+                // Accumulate totals
+                if ($method === 'cash') {
+                    $totalCashAmount += floatval($item['total_amount']);
+                } elseif ($method === 'bank_transfer') {
+                    $totalBankAmount += floatval($item['total_amount']);
+                }
             }
 
-            $batch->quantity -= $item['quantity'];
-            $batch->save();
-
-            // 🔸 Calculate profit for this item
-            $profit = ($item['selling_price'] - $item['cost_price']) * $item['quantity'];
-
-            // Save sales detail
-            CounterSalesDetail::create([
-                'user_id'           => $userId,
-                'product_code'      => $item['product_code'],
-                'product_name'      => $item['product_name'],
-                'quantity'          => $item['quantity'],
-                'cost_price'        => $item['cost_price'],
-                'selling_price'     => $item['selling_price'],
-                'total_amount'      => $item['total_amount'],
-                'amount_paid'       => $item['total_amount'],
-                'balance'           => 0,
-                'method_of_payment' => $method,
-                'profit'            => $profit, // ✅ Profit stored
-            ]);
-
-            // Accumulate totals
-            if ($method === 'cash') {
-                $totalCashAmount += floatval($item['total_amount']);
-            } elseif ($method === 'bank_transfer') {
-                $totalBankAmount += floatval($item['total_amount']);
+            // Save Till Collection if cash
+            if ($totalCashAmount > 0) {
+                TillCollection::create([
+                    'user_id' => $userId,
+                    'amount' => round($totalCashAmount, 2),
+                    'payment_method' => 'cash',
+                    'date' => now()->toDateString(),
+                ]);
             }
+
+            // Save Bank Transaction if bank_transfer
+            // Save Bank Transaction as CREDIT if bank_transfer
+            if ($totalBankAmount > 0) {
+                BankTransaction::create([
+                    'user_id'        => $userId,
+                    'amount'         => round($totalBankAmount, 2),  // ✅ now filled
+                    'credit'         => round($totalBankAmount, 2),  // ✅ also fill credit
+                    'payment_method' => 'bank_transfer',
+                    'bank_name'      => $this->selected_bank,
+                    'reference'      => $this->reference ?? 'BANK-' . now()->timestamp,
+                    'date'           => now()->toDateString(),
+                ]);
+            }
+            
+            // Refresh stock
+            foreach ($productsToRefresh as $code) {
+                $this->refreshTotalStock($code);
+            }
+
+            DB::commit();
+
+            // Clear cart
+            $this->orderItems = [];
+            $this->message = 'Sale saved and stock updated!';
+            $this->savedOrders = CounterSalesDetail::latest()->take(10)->get();
+
+            // ✅ Update Till & Bank totals
+            $cashierId = Auth::id();
+
+            $totalCollected = TillCollection::where('user_id', $cashierId)->sum('amount');
+            $totalWithdrawn = \App\Models\TillWithdrawal::where('cashier_id', $cashierId)->sum('total_amount');
+
+            $this->tillTotal = $totalCollected - $totalWithdrawn;
+
+            $this->bankTotal = BankTransaction::where('user_id', $cashierId)->sum('amount');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $this->errorMessage = 'Could not save sale: ' . $e->getMessage();
         }
-
-        // Save Till Collection if cash
-        if ($totalCashAmount > 0) {
-            TillCollection::create([
-                'user_id'        => $userId,
-                'amount'         => round($totalCashAmount, 2),
-                'payment_method' => 'cash',
-                'date'           => now()->toDateString(),
-            ]);
-        }
-
-        // Save Bank Transaction if bank_transfer
-        if ($totalBankAmount > 0) {
-            BankTransaction::create([
-                'user_id'        => $userId,
-                'amount'         => round($totalBankAmount, 2),
-                'payment_method' => 'bank_transfer',
-                'bank_name'      => $this->bank_name ?? 'N/A',
-                'reference'      => $this->reference ?? 'BANK-' . now()->timestamp,
-                'date'           => now()->toDateString(),
-            ]);
-        }
-
-        // Refresh stock
-        foreach ($productsToRefresh as $code) {
-            $this->refreshTotalStock($code);
-        }
-
-        DB::commit();
-
-        // Clear cart
-        $this->orderItems = [];
-        $this->message = 'Sale saved and stock updated!';
-        $this->savedOrders = CounterSalesDetail::latest()->take(10)->get();
-
-        // ✅ Update Till & Bank totals
-        $cashierId = Auth::id();
-
-        $totalCollected = TillCollection::where('user_id', $cashierId)->sum('amount');
-        $totalWithdrawn = \App\Models\TillWithdrawal::where('cashier_id', $cashierId)->sum('total_amount');
-
-        $this->tillTotal = $totalCollected - $totalWithdrawn;
-
-        $this->bankTotal = BankTransaction::where('user_id', $cashierId)->sum('amount');
-
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        $this->errorMessage = 'Could not save sale: ' . $e->getMessage();
     }
-}
-
-
-
-
-
-
 
     private function refreshTotalStock(string $productCode): void
     {
@@ -423,10 +308,31 @@ public function save(): void
     }
 
     public function getTillTotalProperty()
-{
-    return collect($this->cashCollections)->sum();
-}
+    {
+        return collect($this->cashCollections)->sum();
+    }
 
+    function getPreference($key, $default = null)
+    {
+        $value = \App\Models\SystemPreference::where('key', $key)->value('value');
+
+        // If it's a JSON array (like for banks), decode it
+        if (is_string($value) && is_array(json_decode($value, true))) {
+            return json_decode($value, true);
+        }
+
+        return $value ?? $default;
+    }
+
+    public function processPayment()
+    {
+        if ($this->payment_method === 'bank_transfer' && empty($this->selected_bank)) {
+            session()->flash('error', 'Please select a bank.');
+            return;
+        }
+
+        // Use $this->selected_bank in your transaction save logic
+    }
 
     /* ------------- render ------------- */
     public function render()

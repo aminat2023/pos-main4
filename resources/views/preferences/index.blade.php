@@ -33,20 +33,39 @@
 
                     <div class="form-group">
                         <label>Receipt Header</label>
-                        <input type="text" name="receipt_header" id="receipt_header" value="{{ $preferences['receipt_header'] ?? '' }}" class="form-control" oninput="updatePreview()">
+                        <input type="text" name="receipt_header" id="receipt_header" value="{{ $preferences['receipt_header'] ?? 'Thanks for your purchase!' }}" class="form-control" oninput="updatePreview()">
                     </div>
 
                     <div class="form-group">
                         <label>Receipt Footer</label>
-                        <input type="text" name="receipt_footer" id="receipt_footer" value="{{ $preferences['receipt_footer'] ?? '' }}" class="form-control" oninput="updatePreview()">
+                        <input type="text" name="receipt_footer" id="receipt_footer" value="{{ $preferences['receipt_footer'] ?? 'Come again!' }}" class="form-control" oninput="updatePreview()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Default Language</label>
+                        <select name="default_language" id="default_language" class="form-control" onchange="updatePreview()">
+                            <option value="English" {{ $preferences['default_language'] == 'English' ? 'selected' : '' }}>English</option>
+                            <option value="French" {{ $preferences['default_language'] == 'French' ? 'selected' : '' }}>French</option>
+                            <option value="Spanish" {{ $preferences['default_language'] == 'Spanish' ? 'selected' : '' }}>Spanish</option>
+                            <!-- Add more languages as needed -->
+                        </select>
                     </div>
 
                     <div class="form-group">
                         <label>Dark Mode</label>
                         <select name="dark_mode" id="dark_mode" class="form-control" onchange="toggleDarkMode()">
-                            <option value="0" {{ $preferences['dark_mode'] == '0' ? 'selected' : '' }}>Light</option>
-                            <option value="1" {{ $preferences['dark_mode'] == '1' ? 'selected' : '' }}>Dark</option>
+                            <option value="0" {{ ($preferences['dark_mode'] ?? '0') == '0' ? 'selected' : '' }}>Light</option>
+                            <option value="1" {{ ($preferences['dark_mode'] ?? '0') == '1' ? 'selected' : '' }}>Dark</option>
                         </select>
+                        
+                    </div>
+
+                    <div class="form-group">
+                        <label>Banks</label>
+                        <div id="banksContainer">
+                            <input type="text" name="banks[]" class="form-control mb-2" placeholder="Enter bank name" oninput="updatePreview()">
+                        </div>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="addBankInput()">Add Another Bank</button>
                     </div>
 
                     <button type="submit" class="btn btn-primary mt-3">Save Preferences</button>
@@ -74,12 +93,21 @@
                 <div class="serial-number">
                     Serial: <span class="serial">000001</span>
                 </div>
+
+                <div id="previewBanks">
+                    <strong>Banks:</strong>
+                    <ul id="banksList">
+                        <!-- Banks will be populated here -->
+                        @foreach ($preferences['banks'] ?? [] as $bank)
+                            <li>{{ $bank }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
-
 
 <script>
     function updatePreview() {
@@ -88,6 +116,18 @@
         document.getElementById('previewReceiptHeader').textContent = document.getElementById('receipt_header').value || '';
         document.getElementById('previewReceiptFooter').textContent = document.getElementById('receipt_footer').value || '';
         document.getElementById('previewOfficeAddress').textContent = document.getElementById('office_address').value || 'No Address';
+
+        // Update banks preview
+        const bankInputs = document.getElementsByName('banks[]');
+        const banksList = document.getElementById('banksList');
+        banksList.innerHTML = ''; // Clear existing list
+        for (let input of bankInputs) {
+            if (input.value) {
+                const li = document.createElement('li');
+                li.textContent = input.value;
+                banksList.appendChild(li);
+            }
+        }
     }
 
     function previewLogo(event) {
@@ -109,6 +149,16 @@
         document.getElementById('invoice_pos').classList.toggle('text-white', isDark);
     }
 
+    function addBankInput() {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'banks[]';
+        input.className = 'form-control mb-2';
+        input.placeholder = 'Enter bank name';
+        input.oninput = updatePreview; // Bind the same preview function
+        document.getElementById('banksContainer').appendChild(input);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('toggleSidebar').addEventListener('click', () => {
             document.getElementById('preferencesSidebar').classList.toggle('d-none');
@@ -116,8 +166,24 @@
 
         toggleDarkMode();
     });
-</script>
 
+
+    
+
+
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        // Save preference in local storage
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+
+    // Check for saved theme preference
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+
+
+</script>
 
 <style>
     .d-none { display: none; }
@@ -186,5 +252,14 @@
     .serial {
         font-weight: bold;
     }
-</style>
 
+    body {
+    background-color: white;
+    color: black;
+}
+
+.dark-mode {
+    background-color: black;
+    color: white;
+}
+</style>
