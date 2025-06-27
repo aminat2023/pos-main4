@@ -104,14 +104,15 @@
                 <button onclick="window.print()" style="background-color:#343a40; color:white; border:none; padding:10px 20px; margin:5px; border-radius:4px;">
                     🖨️ Print
                 </button>
-                <a href="{{ route('profit_loss.pdf', ['from_date' => request('from_date'), 'to_date' => request('to_date')]) }}"
-                   style="background-color:#dc3545; color:white; text-decoration:none; padding:10px 20px; margin:5px; border-radius:4px;">
-                   📄 Export PDF
-                </a>
-                <a href="{{ route('profit_loss.excel', ['from_date' => request('from_date'), 'to_date' => request('to_date')]) }}"
-                   style="background-color:#28a745; color:white; text-decoration:none; padding:10px 20px; margin:5px; border-radius:4px;">
-                   📊 Export Excel
-                </a>
+                <a href="{{ route('profit_loss.exportPdf', ['from_date' => request('from_date'), 'to_date' => request('to_date')]) }}"
+                    style="background-color:#dc3545; color:white; text-decoration:none; padding:10px 20px; margin:5px; border-radius:4px;">
+                    📄 Export PDF
+                 </a>
+                 <a href="{{ route('profit_loss.exportExcel', ['from_date' => request('from_date'), 'to_date' => request('to_date')]) }}"
+                    style="background-color:#28a745; color:white; text-decoration:none; padding:10px 20px; margin:5px; border-radius:4px;">
+                    📊 Export Excel
+                 </a>
+                 
             </div>
             
     

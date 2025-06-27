@@ -28,6 +28,22 @@
                     {{ session('success') }}
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                 </div>
+
+                <!-- Reset form and hide after success -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const form = document.querySelector("form");
+                        form.reset();
+
+                        const card = document.getElementById('supplyCard');
+                        const btn = document.getElementById('showSupplyFormBtn');
+                        card.classList.add('fade-out');
+                        setTimeout(() => {
+                            card.style.display = "none";
+                            btn.style.display = "inline-block";
+                        }, 500);
+                    });
+                </script>
             @endif
 
             <form method="POST" action="{{ route('supplies.store') }}">
@@ -35,8 +51,8 @@
 
                 <div class="mb-3">
                     <label for="supplier_id" class="form-label">Supplier</label>
-                    <select name="supplier_id" id="supplier_id" class="form-select form-control" required>
-                        <option value="">Select Supplier</option>
+                    <select name="supplier_id" id="supplier_id" class="form-select form-control">
+                        <option value="">Anonymous Supplier</option> <!-- Default anonymous -->
                         @foreach($suppliers as $supplier)
                             <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                         @endforeach
@@ -66,8 +82,6 @@
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn" style="background-color: teal; color:white;">Record Supply</button>
                 </div>
-                {{-- <input type="text" class="form-control" value="{{ $supply->supply_id }}" disabled> --}}
-
             </form>
         </div>
     </div>
@@ -80,7 +94,6 @@
         const card = document.getElementById('supplyCard');
         const btn = document.getElementById('showSupplyFormBtn');
 
-        // If card is visible, fade it out
         if (card.style.display !== "none") {
             card.classList.add('fade-out');
             setTimeout(() => {
@@ -88,7 +101,6 @@
                 btn.style.display = "inline-block";
             }, 500);
         } else {
-            // Show card with fade in
             card.style.display = "block";
             card.classList.remove('fade-out');
             card.classList.add('fade-in');

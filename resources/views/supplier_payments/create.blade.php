@@ -7,6 +7,8 @@
             <h4>Make Payment for Supplied Goods</h4>
         </div>
         <div class="card-body">
+
+            {{-- Success/Error Messages --}}
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
@@ -14,10 +16,9 @@
                 <div class="alert alert-danger">{{ session('error') }}</div>
             @endif
 
+            {{-- Payment Form --}}
             <form method="POST" action="{{ route('supplier_payments.store') }}">
                 @csrf
-
-                <!-- Hidden: supply_id -->
                 <input type="hidden" name="supply_id" value="{{ $supply->id }}">
 
                 <div class="mb-3">
@@ -41,20 +42,47 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Amount Paid (₦)</label>
-                    <input type="number" name="amount_paid" class="form-control" step="0.01" required>
+                    <label class="form-label">Amount Already Paid (₦)</label>
+                    <input type="text" class="form-control text-success" value="₦{{ number_format($supply->amount_paid, 2) }}" disabled>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Remaining Balance (₦)</label>
+                    <input type="text" class="form-control text-danger fw-bold" value="₦{{ number_format($supply->balance, 2) }}" disabled>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Amount to Pay Now (₦)</label>
+                    <input 
+                        type="number" 
+                        name="amount_paid" 
+                        class="form-control" 
+                        step="0.01" 
+                        min="0.01"
+                        max="{{ $supply->balance }}" 
+                        placeholder="Max: ₦{{ number_format($supply->balance, 2) }}" 
+                        required
+                    >
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Payment Mode</label>
                     <select name="payment_mode" class="form-control" required>
                         <option value="">Select Payment Mode</option>
-                        <option value="cash">Cash</option>
-                        <option value="bank">Bank Transfer</option>
+                        <option value="cash">
+                            Cash (Vault - ₦{{ number_format($vaultBalance, 2) }})
+                        </option>
+                        @foreach($bankBalances as $bank => $balance)
+                            <option value="{{ $bank }}">
+                                Bank: {{ $bank }} - ₦{{ number_format($balance, 2) }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-success w-100">Submit Payment</button>
+                <button type="submit" class="btn btn-success w-100">
+                    Submit Payment
+                </button>
             </form>
         </div>
     </div>

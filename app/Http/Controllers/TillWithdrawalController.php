@@ -8,6 +8,9 @@ use App\Models\TillWithdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\BankTransaction;
+use App\Models\VaultTransaction;
+
 
 
 class TillWithdrawalController extends Controller
@@ -17,9 +20,11 @@ class TillWithdrawalController extends Controller
      */
     public function index()
     {
-        $withdrawals = TillWithdrawal::with(['admin', 'cashier'])->latest()->get();
+        $withdrawals = \App\Models\TillWithdrawal::with(['admin', 'cashier'])->latest()->get();
+    
         return view('till.index', compact('withdrawals'));
     }
+    
 
     /**
      * Show withdrawal form with till balances per cashier
@@ -44,49 +49,20 @@ class TillWithdrawalController extends Controller
         return view('till.withdraw', compact('cashiers', 'tillAmounts'));
     }
 
-    /**
-     * Store a withdrawal
-     */
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'cashier_id'    => 'required|exists:users,id',
-    //         'destination'   => 'required|in:bank,vault',
-    //         'denominations' => 'required|array',
-    //     ]);
 
-    //     // Compute the total withdrawal amount from denominations
-    //     $totalAmount = 0;
-    //     foreach ($request->denominations as $note => $count) {
-    //         $totalAmount += ((int) $note) * ((int) $count);
-    //     }
-
-    //     // Save the withdrawal
-    //     TillWithdrawal::create([
-    //         'admin_id'      => Auth::id(),
-    //         'cashier_id'    => $request->cashier_id,
-    //         'destination'   => $request->destination,
-    //         'denominations' => json_encode($request->denominations),
-    //         'total_amount'  => $totalAmount,
-    //         'notes'         => $request->notes,
-    //     ]);
-
-    //     return redirect()->route('till.withdraw.create')->with('success', 'Till money withdrawn and recorded successfully!');
-    // }
+   
     
-
   
 
 public function store(Request $request)
 {
     $request->validate([
         'cashier_id'    => 'required|exists:users,id',
-        'destination'   => 'required|in:bank,vault',
+        'destination'   => 'required|string',
         'denominations' => 'required|array',
         'admin_password' => 'required|string',
     ]);
 
-    // Authenticate admin by checking password
     $admin = Auth::user();
 
     if (!Hash::check($request->admin_password, $admin->password)) {
@@ -100,7 +76,7 @@ public function store(Request $request)
     }
 
     // Save the withdrawal
-    \App\Models\TillWithdrawal::create([
+    $withdrawal = \App\Models\TillWithdrawal::create([
         'admin_id'      => $admin->id,
         'cashier_id'    => $request->cashier_id,
         'destination'   => $request->destination,
@@ -109,8 +85,31 @@ public function store(Request $request)
         'notes'         => $request->notes,
     ]);
 
+    // Save to credit only (not amount or debit)
+    if ($request->destination === 'vault') {
+        VaultTransaction::create([
+            'credit'  => $totalAmount,
+            'debit'   => 0,
+            'reason'  => 'Till Withdrawal by Admin: ' . $admin->name,
+            'user_id' => $admin->id,
+        ]);
+    } else {
+        BankTransaction::create([
+            'credit'         => $totalAmount,
+            'debit'          => 0,
+            'bank_name'      => $request->destination,
+            'payment_method' => 'Till Withdrawal',
+            'user_id'        => $admin->id,
+            'date'           => now(),
+        ]);
+    }
+
     return redirect()->route('till.withdraw.create')->with('success', 'Till money withdrawn and recorded successfully!');
 }
+
+    
+
+    
 
     
 

@@ -43,7 +43,7 @@
             </div>
         </div> --}}
 
-        <div class="card-body">
+       <div class="card-body">
             @if(session('supply_created'))
     <div class="alert alert-success">
         Supply recorded. <a href="{{ route('supplier_payments.create', session('supply_created')) }}" class="btn btn-sm btn-success ml-2">Proceed to Payment</a>
@@ -56,7 +56,10 @@
             <th>Supplier</th>
             <th>Product</th>
             <th>Quantity</th>
-            <th>Amount</th>
+            <th>Total Amount</th>
+            <th>Paid</th>
+            <th>Balance</th>
+            <th>Status</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -67,15 +70,38 @@
             <td>{{ $supply->product_name }}</td>
             <td>{{ $supply->quantity }}</td>
             <td>₦{{ number_format($supply->amount, 2) }}</td>
+            <td>₦{{ number_format($supply->amount_paid, 2) }}</td>
             <td>
-                <a href="{{ route('supplier_payments.create', $supply->id) }}" class="btn btn-sm btn-primary">
-                    Make Payment
-                </a>
+                @if($supply->balance > 0)
+                    <span class="text-danger">₦{{ number_format($supply->balance, 2) }}</span>
+                @else
+                    <span class="text-muted">₦0.00</span>
+                @endif
+            </td>
+            <td>
+                @if($supply->payment_status === 'paid')
+                    <span class="badge bg-success">Paid</span>
+                @elseif($supply->payment_status === 'partial')
+                    <span class="badge bg-warning text-dark">Partial</span>
+                @else
+                    <span class="badge bg-danger">Unpaid</span>
+                @endif
+            </td>
+            <td>
+                @if($supply->payment_status === 'paid')
+                    <button class="btn btn-sm btn-secondary" disabled>Paid</button>
+                @else
+                    <a href="{{ route('supplier_payments.create', $supply->id) }}" class="btn btn-sm btn-primary">
+                        Make Payment
+                    </a>
+                @endif
             </td>
         </tr>
         @endforeach
     </tbody>
 </table>
+>
+
 
         </div>
     </div>

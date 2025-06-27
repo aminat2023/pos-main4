@@ -137,20 +137,24 @@ class VaultTransactionController extends Controller
 
 
 
-    public function report(Request $request)
+public function report(Request $request)
 {
     $query = \App\Models\VaultTransaction::query();
 
+    // Filter by date if provided
     if ($request->filled('from') && $request->filled('to')) {
         $query->whereBetween('created_at', [$request->from, $request->to]);
     }
 
-    $totalIn = (clone $query)->where('type', 'in')->sum('amount');
-    $totalOut = (clone $query)->where('type', 'out')->sum('amount');
-
-    $balance = $totalIn + $totalOut; // out is stored as negative, so sum works
-
+    // Get filtered transactions
     $transactions = $query->latest()->get();
+
+    // Sum debit and credit amounts
+    $totalOut = $transactions->sum('debit');
+    $totalIn = $transactions->sum('credit');
+
+    // Calculate balance
+    $balance = $totalIn - $totalOut;
 
     return view('vault.report', compact('transactions', 'totalIn', 'totalOut', 'balance'));
 }

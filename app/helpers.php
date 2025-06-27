@@ -1,23 +1,25 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-
 if (!function_exists('getPreference')) {
     function getPreference($key, $default = null)
     {
-        // Optional: Filter by user_id if each user has separate settings
-        // Assuming single set of preferences for now
-        $preference = DB::table('system_preferences')->where('key', $key)->value('value');
+        $row = \App\Models\SystemPreference::where('key', $key)->first();
 
-        return $preference ?? $default;
+        if (!$row) {
+            return $default;
+        }
+
+        $value = $row->value;
+
+        // Decode only if it's a JSON string
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            }
+        }
+
+        return $value;
     }
 }
 
-if (!function_exists('getAllPreferences')) {
-    function getAllPreferences()
-    {
-        // Fetch preferences as key => value array
-        return DB::table('system_preferences')->pluck('value', 'key')->toArray();
-    }
-}

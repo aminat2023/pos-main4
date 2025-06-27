@@ -68,11 +68,15 @@
     <div class="receipt">
         <!-- Header -->
         <div class="center">
-            <img class="logo" src="{{ asset('storage/' . getPreference('business_logo', 'default-logo.png')) }}" alt="Logo">
-            <h2>{{ getPreference('business_name', 'My Business') }}</h2>
-            <p>{{ getPreference('office_address', 'No Address Provided') }}</p>
+            {{-- @if (!empty($preferences['business_logo']))
+            <img src="{{ asset('storage/' . ltrim($preferences['business_logo'], '/')) }}" alt="Logo" style="max-height: 60px; margin-top: 10px;">
+        @endif
+         --}}
+        
+                    <hr><h2>{{ getPreference('business_name', 'My Business') }}</h2><hr>
+            <p>{{ getPreference('office_address', 'No Address Provided') }}</p> 
             <p>{{ now()->format('Y-m-d H:i') }}</p>
-            <hr>
+           
         </div>
 
         <!-- Items -->

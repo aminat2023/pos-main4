@@ -23,14 +23,18 @@
                 <div class="form-group">
                     <label>Select Bank</label>
                     @php
-                        $banks = json_decode(getPreference('banks', '[]'), true);
-                    @endphp
-                    <select name="bank_name" class="form-control" required>
-                        <option value="">-- Select Bank --</option>
-                        @foreach($banks as $bank)
-                            <option value="{{ $bank }}">{{ $bank }}</option>
-                        @endforeach
-                    </select>
+                    $banks = json_decode(getPreference('banks', '[]'), true);
+                    if (!is_array($banks)) {
+                        $banks = []; // Ensure $banks is an array
+                    }
+                @endphp
+                
+                <select name="bank_name" class="form-control" required>
+                    <option value="">-- Select Bank --</option>
+                    @foreach($banks as $bank)
+                        <option value="{{ $bank }}">{{ $bank }}</option>
+                    @endforeach
+                </select>
                 </div>
 
                 <div class="form-group">

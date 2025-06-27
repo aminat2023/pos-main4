@@ -175,8 +175,7 @@
                                         <select id="bank_select" wire:model="selected_bank" class="form-control mt-2">
                                             <option value="">Select a bank</option>
                                             @php
-                                                $banks = json_decode(getPreference('banks', '[]'), true);
-                                            @endphp
+$banks = getPreference('banks', []);                                            @endphp
                                             @foreach ($banks as $bank)
                                                 <option value="{{ $bank }}">{{ $bank }}</option>
                                             @endforeach

@@ -4,9 +4,18 @@
     <div class="container-fluid">
         <div>
             <div>
+                @php
+                $logoPath = getPreference('business_logo');
+            @endphp
+            
+            @if ($logoPath && file_exists(public_path('storage/' . $logoPath)))
+                <img class="logo" src="{{ asset('storage/' . $logoPath) }}" alt="Logo">
+            @else
+                <img class="logo" src="{{ asset('images/default-logo.png') }}" alt="Default Logo">
+            @endif
                 <div class="container2">
                     <h1 class="card-header">
-                        <span class="marquee-text"> <h1>{{ getPreference('business_name', 'My Business') }}</h1>
+                        <span > <h1 class="marquee-text"> {{ getPreference('business_name', 'My Business') }}</h1>
                         </span>
                         
                     </h1>

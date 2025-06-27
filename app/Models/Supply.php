@@ -11,6 +11,7 @@ class Supply extends Model
 
     protected $fillable = [
         'supplier_id',
+        'supplier_name', // Add this line
         'product_name',
         'quantity',
         'unit_price',
@@ -18,8 +19,9 @@ class Supply extends Model
         'amount_paid',
         'balance',
         'payment_status',
-        'supply_id', 
+        'supply_id',
     ];
+    
     
 
     public function supplies()

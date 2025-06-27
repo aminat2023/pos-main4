@@ -13,11 +13,16 @@ class SupplierPayment extends Model
 
     protected $fillable = [
         'supply_id',
+        'supplier_id',
+        'product_name',
+        'quantity',
+        'amount',
         'amount_paid',
         'balance',
         'payment_mode',
+        'invoice_number'
     ];
-
+    
     // Relationship to supply
     public function supply()
     {

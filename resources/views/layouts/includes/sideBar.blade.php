@@ -1,62 +1,74 @@
 <!-- Sidebar -->
 <nav class="active" id="sidebar">
     <ul class="list-unstyled lead">
+
         <li class="active">
-            <a href=""><i class="fa fa-home fa-lg"></i> Home</a>
-        </li>
-        <li>
-            <a href="{{ route('orders.index') }}"><i class="fa fa-box fa-lg"></i> Orders</a>
-        </li>
-        <li>
-            <a href="{{ route('product.index') }}"><i class="fa fa-truck fa-lg"></i> Products</a>
-        </li>
-        <li>
-            <a href="{{ route('sections.index') }}"><i class="fa fa-truck fa-lg"></i> Sections</a>
-        </li>
-        <li>
-            <a href="{{ route('categories.index') }}"><i class="fa fa-list-alt"></i> Categories</a>
-        </li>
-        <li>
-            <a href="{{ route('sub_categories.index') }}"><i class="fa fa-list-alt"></i> Sub Categories</a>
+            <a href="#"><i class="fa fa-home fa-lg"></i> Home</a>
         </li>
 
-        <li>        <a href="{{ route('till.withdraw.create') }}"><i class="fa fa-list-alt"></i>Withdraw Till</a>
-        </li>
-
-        <li>
-            <a href="{{ route('daily_sales.index') }}">
-                <i class="fa fa-history"></i> History
-            </a>
-        </li>
-        
-
+        {{-- <li><a href="{{ route('orders.index') }}"><i class="fa fa-box fa-lg"></i> Orders</a></li> --}}
+        {{-- <li><a href="{{ route('product.index') }}"><i class="fa fa-truck fa-lg"></i> Products</a></li> --}}
+        <li><a href="{{ route('sections.index') }}"><i class="fa fa-th-large"></i> Sections</a></li>
+        <li><a href="{{ route('categories.index') }}"><i class="fa fa-list-alt"></i> Categories</a></li>
+        {{-- <li><a href="{{ route('sub_categories.index') }}"><i class="fa fa-list"></i> Sub Categories</a></li> --}}
+        <li><a href="{{ route('till.withdraw.create') }}"><i class="fa fa-arrow-circle-up"></i> Withdraw Till</a></li>
+        <li><a href="{{ route('daily_sales.index') }}"><i class="fa fa-history"></i> History</a></li>
 
         <!-- Settings Dropdown -->
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#settingsCollapse" role="button">
+        <li>
+            <a class="nav-link" data-toggle="collapse" href="#settingsCollapse" role="button" aria-expanded="false">
                 <i class="fa fa-cog"></i> Set-up
             </a>
             <div class="collapse" id="settingsCollapse">
                 <ul class="list-group list-group-flush">
                     <li><a class="list-group-item" href="#" data-toggle="modal" data-target="#addUser">Add New User</a></li>
                     <li><a class="list-group-item" href="{{ route('preferences.index') }}">System Preferences</a></li>
-                    <li><a class="list-group-item" href="">Payment Methods</a></li>
+                    <li><a class="list-group-item" href="#">Payment Methods</a></li>
                 </ul>
             </div>
         </li>
-        <li class="nav-item">
+
+        <li>
             <a class="nav-link {{ request()->is('user-activity-logs') ? 'active' : '' }}" href="{{ route('user.activity.logs') }}">
                 🕵️ Activity Logs
             </a>
         </li>
 
-
-        <li class="{{ request()->is('journal*') ? 'active' : '' }}">
-            <a href="{{ route('journal.index') }}">
-                <i class="fa fa-book"></i> Journal Entries
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('moneybox.index') }}">
+                <i class="fas fa-piggy-bank"></i> Money Box
             </a>
         </li>
         
+
+        <!-- Journals Dropdown -->
+        <li>
+            <a class="nav-link" data-toggle="collapse" href="#journalCollapse" role="button" aria-expanded="false">
+                <i class="fa fa-book"></i> Journals
+            </a>
+            <div class="collapse" id="journalCollapse">
+                <ul class="list-group list-group-flush">
+                    <li>
+                        <a class="list-group-item" href="{{ route('journal.index') }}">
+                            <i class="fa fa-file-alt text-primary"></i> Journal Entries
+                        </a>
+                    </li>
+                    <li>
+                        <a class="list-group-item" href="{{ route('vault.in') }}">
+                            <i class="fa fa-arrow-down text-success"></i> Vault In
+                        </a>
+                    </li>
+                    <li>
+                        <a class="list-group-item" href="{{ route('vault.out') }}">
+                            <i class="fa fa-arrow-up text-danger"></i> Vault Out
+                        </a>
+                    </li>
+
+                 
+                </ul>
+            </div>
+        </li>
+
     </ul>
 </nav>
 
@@ -85,26 +97,11 @@
 
                 <form action="{{ route('users.store') }}" method="post">
                     @csrf
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone</label>
-                        <input type="text" name="phone" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input type="password" name="confirm_password" class="form-control" required>
-                    </div>
+                    <div class="form-group"><label>Name</label><input type="text" name="name" class="form-control" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" name="email" class="form-control" required></div>
+                    <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control"></div>
+                    <div class="form-group"><label>Password</label><input type="password" name="password" class="form-control" required></div>
+                    <div class="form-group"><label>Confirm Password</label><input type="password" name="confirm_password" class="form-control" required></div>
                     <div class="form-group">
                         <label>Role</label>
                         <select name="is_admin" class="form-control">
@@ -112,9 +109,7 @@
                             <option value="0">Cashier</option>
                         </select>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary btn-block">Save</button>
-                    </div>
+                    <div class="modal-footer"><button class="btn btn-primary btn-block">Save</button></div>
                 </form>
             </div>
 
@@ -122,7 +117,7 @@
     </div>
 </div>
 
-<!-- CSS Styling -->
+<!-- Styles -->
 <style>
     #sidebar ul.lead {
         border-bottom: 1px solid #47748b;
@@ -153,30 +148,6 @@
         background: #008B8B;
     }
 
-    .dropdown-submenu {
-        position: relative;
-    }
-
-    .dropdown-submenu .dropdown-menu {
-        top: 0;
-        left: 100%;
-        margin-left: 0;
-        margin-right: 0;
-        display: none;
-    }
-
-    .dropdown-submenu:hover .dropdown-menu {
-        display: block;
-    }
-
-    .dropdown-submenu > a::after {
-        content: "▶";
-        float: right;
-        margin-top: 5px;
-        margin-right: -10px;
-        font-size: 0.7rem;
-    }
-
     .modal.right .modal-dialog {
         position: fixed;
         margin: auto;
@@ -200,5 +171,16 @@
 
     .modal.right.fade.show .modal-dialog {
         transform: translateX(0);
+    }
+
+    .list-group-item {
+        font-size: 0.95rem;
+        padding: 8px 16px;
+        color: #008B8B;
+    }
+
+    .list-group-item:hover {
+        background-color: #008B8B;
+        color: white;
     }
 </style>
