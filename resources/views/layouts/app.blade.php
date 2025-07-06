@@ -33,18 +33,26 @@
             <div class="container">
                 @include('layouts.includes.navBar')
 
+                {{-- Hide toggler on small screens --}}
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                     aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
                     <!-- Left Side -->
                     <ul class="navbar-nav mr-auto"></ul>
 
                     <!-- Right Side -->
                     <ul class="navbar-nav ml-auto">
+                        <!-- 🌞 / 🌙 Theme Toggle -->
+                        <li class="nav-item ml-2">
+                            <button onclick="toggleTheme()" class="btn btn-outline-secondary btn-sm" title="Toggle Theme">
+                                <span id="theme-icon">🌙</span>
+                            </button>
+                        </li>
+
                         @auth
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle text-dark" href="#"
@@ -85,19 +93,17 @@
             </div>
         </nav>
 
-
         <!-- Go Back to Home Link -->
         @if (Request::path() !== '/')
             <div style="background: #f0f0f0; padding: 10px 20px;">
                 @if (!in_array(Request::path(), ['/', 'home']))
-                <div style="background: #f0f0f0; padding: 10px 20px;">
-                    <a href="{{ url('/home') }}"
-                        style="text-decoration: none; color: #007bff; font-weight: bold;">
-                        ← Go Back to Home
-                    </a>
-                </div>
-            @endif
-            
+                    <div style="background: #f0f0f0; padding: 10px 20px;">
+                        <a href="{{ url('/home') }}"
+                            style="text-decoration: none; color: #007bff; font-weight: bold;">
+                            ← Go Back to Home
+                        </a>
+                    </div>
+                @endif
             </div>
         @endif
 
@@ -123,38 +129,96 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <!-- Custom Styles -->
     <style>
         body {
-            background: linear-gradient(to bottom right, #008B8B, #1e4225, #004d4d);
-            color: #0d0e0c;
+            background: rgb(57, 87, 87);
+            color: black;
             width: 100%;
             font-family: 'Nunito', sans-serif;
+            transition: all 0.3s ease;
         }
 
-        .modal.left .modal-dialog {
-            position: absolute;
-            top: 0;
-            left: 0;
-            margin: 0;
-        }
+        /* DARK MODE STYLES */
+        body.dark-mode {
+    background: linear-gradient(to bottom right, #1a1a1a, #222831, #1f2a38) !important;
+    color: #c0e0f0 !important;
+}
 
-        .modal.left .modal-dialog.modal-sm {
-            max-width: 300px;
-        }
+.dark-mode .navbar {
+    background-color: #12181b !important;
+    color: #78d1ff;
+    border-bottom: 1px solid #2c3e50;
+}
 
-        .modal.left .modal-content {
-            border: 0;
-        }
+.dark-mode .dropdown-menu {
+    background-color: #1f2a38;
+    color: #c0e0f0;
+    border: 1px solid #34495e;
+}
 
-        h4 {
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
-            font-size: 30px;
-            font-weight: bolder;
-            text-transform: uppercase;
-        }
+.dark-mode .btn,
+.dark-mode .form-control,
+.dark-mode .modal-content {
+    background-color: #28313b;
+    color: #ffffff;
+    border-color: #3d4f5c;
+}
+
+.dark-mode a {
+    color: #62d4ff;
+}
+
+.dark-mode .btn-outline-primary {
+    border-color: #62d4ff;
+    color: #62d4ff;
+}
+
+.dark-mode .btn-outline-primary:hover {
+    background-color: #62d4ff;
+    color: #121212;
+}
+
+/* Modal slide-in from left */
+.modal.left .modal-dialog {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+}
+
+.modal.left .modal-dialog.modal-sm {
+    max-width: 300px;
+}
+
+.modal.left .modal-content {
+    border: 0;
+    background: #2c3e50;
+}
+
+/* Header Text */
+h4 {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 30px;
+    font-weight: bolder;
+    text-transform: uppercase;
+    color: #b6dfff;
+}
+@media (max-width: 767.98px) {
+    .navbar-nav.ml-auto .nav-item {
+        text-align: center;
+    }
+
+    .navbar-nav.ml-auto .btn,
+    .navbar-nav.ml-auto .dropdown-toggle {
+        width: 100%;
+        text-align: left;
+    }
+}
     </style>
 
     <!-- Scripts (Bootstrap 4) -->
@@ -169,6 +233,27 @@
     @livewireScripts
 
     @yield('script')
-</body>
 
+    <!-- Dark Mode Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mode = localStorage.getItem('darkMode');
+            if (mode === 'enabled') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-icon').textContent = '🌞';
+            } else {
+                document.getElementById('theme-icon').textContent = '🌙';
+            }
+        });
+
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            body.classList.toggle('dark-mode');
+            const enabled = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', enabled ? 'enabled' : 'disabled');
+            icon.textContent = enabled ? '🌞' : '🌙';
+        }
+    </script>
+</body>
 </html>

@@ -43,4 +43,6 @@ class CounterSalesDetail extends Model
     {
         return $this->belongsTo(IncomingStock::class, 'product_code', 'product_code'); // adjust field if needed
     }
+
+
 }

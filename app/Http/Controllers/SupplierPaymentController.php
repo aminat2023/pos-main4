@@ -29,19 +29,23 @@ class SupplierPaymentController extends Controller
 }
 
     
-
 public function store(Request $request)
 {
     $request->validate([
-        'supply_id' => 'required|exists:supplies,id',
-        'amount_paid' => 'required|numeric|min:0.01',
-        'payment_mode' => 'required|string',
+        'supply_id'     => 'required|exists:supplies,id',
+        'amount_paid'   => 'required|numeric|min:0.01',
+        'payment_mode'  => 'required|string',
     ]);
 
     $supply = Supply::with('supplier')->findOrFail($request->supply_id);
     $amountPaid = $request->amount_paid;
 
-    // 🛑 Check if the bank/cash has sufficient balance
+    // 🛑 Check if full payment has already been made
+    if ($supply->balance <= 0) {
+        return back()->with('error', 'Full payment has already been made for this supply.');
+    }
+
+    // 🛑 Check vault or bank balance
     if ($request->payment_mode === 'cash') {
         $vaultBalance = \App\Models\MoneyBox::where('bank_name', 'Vault')->value('balance') ?? 0;
         if ($vaultBalance < $amountPaid) {
@@ -54,33 +58,40 @@ public function store(Request $request)
         }
     }
 
-    // 🧾 Calculate new balances
+    // 🧾 Generate invoice number from supply ID
+    $invoiceNumber = 'INV' . str_pad($supply->id, 5, '0', STR_PAD_LEFT);
+
+    // ✅ Check if this invoice already exists
+    if (SupplierPayment::where('invoice_number', $invoiceNumber)->exists()) {
+        return back()->with('error', 'Payment has already been made for this supply.')->withInput();
+    }
+
+    // 🧮 Calculate payment
     $newAmountPaid = $supply->amount_paid + $amountPaid;
     $newBalance = $supply->amount - $newAmountPaid;
     $paymentStatus = $newBalance <= 0 ? 'paid' : 'partial';
 
-    // 💾 Create the payment record
+    // 💾 Create payment record
     $payment = SupplierPayment::create([
-        'supply_id'     => $supply->id,
-        'supplier_id'   => $supply->supplier_id,
-        'product_name'  => $supply->product_name,
-        'quantity'      => $supply->quantity,
-        'amount'        => $supply->amount,
-        'amount_paid'   => $amountPaid,
-        'balance'       => $newBalance,
-        'payment_mode'  => $request->payment_mode,
-        'invoice_number'=> 'INV' . str_pad($supply->id, 5, '0', STR_PAD_LEFT),
+        'supply_id'      => $supply->id,
+        'supplier_id'    => $supply->supplier_id,
+        'product_name'   => $supply->product_name,
+        'quantity'       => $supply->quantity,
+        'amount'         => $supply->amount,
+        'amount_paid'    => $amountPaid,
+        'balance'        => $newBalance,
+        'payment_mode'   => $request->payment_mode,
+        'invoice_number' => $invoiceNumber,
     ]);
 
-    // 📦 Update the supply table
+    // 🔄 Update supply
     $supply->update([
         'amount_paid'    => $newAmountPaid,
         'balance'        => $newBalance,
-        'payment_status' => $newBalance <= 0 ? 'paid' : 'partial',
+        'payment_status' => $paymentStatus,
     ]);
-    
 
-    // 💳 Deduct from vault or selected bank
+    // 💳 Deduct from bank or vault
     $source = $request->payment_mode === 'cash' ? 'Vault' : $request->payment_mode;
     $moneyBox = \App\Models\MoneyBox::where('bank_name', $source)->first();
     if ($moneyBox) {
@@ -91,6 +102,7 @@ public function store(Request $request)
     return redirect()->route('supplier_payments.invoice', $payment->id)
         ->with('success', 'Payment recorded successfully.');
 }
+
 
 
 

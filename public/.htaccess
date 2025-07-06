@@ -1,12 +1,12 @@
-# Set PHP Memory Limit
-
-
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
+
+    # This line is critical for subfolder setups like yours
+    RewriteBase /pos-main3-master/public/
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d

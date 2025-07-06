@@ -37,25 +37,40 @@ class SystemPreferenceController extends Controller
 
     public function update(Request $request)
     {
-        $data = $request->except('_token');
+        $data = $request->all();
 
-        // Handle business logo upload
+        // Save business preferences
+        getPreference('business_name', $data['business_name']);
+        getPreference('office_address', $data['office_address']);
+        getPreference('currency_symbol', $data['currency_symbol']);
+        getPreference('receipt_header', $data['receipt_header']);
+        getPreference('receipt_footer', $data['receipt_footer']);
+        getPreference('dark_mode', $data['dark_mode']);
+
+        // Save business logo
         if ($request->hasFile('business_logo')) {
-            $file = $request->file('business_logo');
-            $path = $file->store('logos', 'public');
-            SystemPreference::updateOrCreate(['key' => 'business_logo'], ['value' => $path]);
+            $logoPath = $request->file('business_logo')->store('logos', 'public');
+            getPreference('business_logo', $logoPath);
         }
 
-        // Handle banks array
-        if (isset($data['banks']) && is_array($data['banks'])) {
-            $data['banks'] = json_encode(array_filter($data['banks']));
+        // Save banks (filter out empty entries)
+        $banks = array_filter($data['banks'] ?? []);
+        getPreference('banks', $banks);
+
+        // Save default language
+        $language = $data['default_language'] ?? 'en';
+        if (in_array($language, ['en', 'fr'])) {
+            getPreference('default_language', $language);
         }
 
-        // Save other preferences
-        foreach ($data as $key => $value) {
-            SystemPreference::updateOrCreate(['key' => $key], ['value' => $value]);
-        }
-
-        return redirect()->back()->with('success', 'Preferences updated successfully.');
+        // Return with success and set the cookie for language preference (1 year)
+        return redirect()->back()
+            ->with('success', 'Preferences saved successfully.')
+            ->withCookie(cookie('app_locale', $language, 60 * 24 * 365)); // 1 year
     }
+
+
+
+    
+    
 }

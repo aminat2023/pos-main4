@@ -1,5 +1,6 @@
 <?php
 
+
 if (!function_exists('getPreference')) {
     function getPreference($key, $default = null)
     {
@@ -22,4 +23,6 @@ if (!function_exists('getPreference')) {
         return $value;
     }
 }
+
+
 
