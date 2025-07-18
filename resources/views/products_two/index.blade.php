@@ -39,7 +39,7 @@
                                     <tr>
                                         <th>Product Name</th>
                                         <th>Brand</th>
-                                        <th>Total Stock</th>
+                                        <th>Alert Stock</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -48,7 +48,7 @@
                                         <tr>
                                             <td>{{ $product->product_name }}</td>
                                             <td>{{ $product->brand }}</td>
-                                            <td>{{ $product->total_stock }}</td>
+                                            <td>{{ $product->alert_stock }}</td>
                                             <td>
                                                 <div class="btn-group">
                                                     <!-- View Details button -->
@@ -113,6 +113,7 @@
                                             aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
+
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="editProductLabel{{ $product->id }}">
                                                             Edit Product</h5>
@@ -126,6 +127,28 @@
                                                         @csrf
                                                         @method('PUT')
                                                         <div class="modal-body">
+                                                            <div class="form-group">
+                                                                <label for="section_id">Section</label>
+                                                                <select name="section_id" class="form-control" required>
+                                                                    @foreach ($sections as $section)
+                                                                        <option value="{{ $section->id }}" {{ $section->section_name == $product->section_name ? 'selected' : '' }}>
+                                                                            {{ $section->section_name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            
+                                                            <div class="form-group">
+                                                                <label for="category_id">Category</label>
+                                                                <select name="category_id" class="form-control" required>
+                                                                    @foreach ($categories as $category)
+                                                                        <option value="{{ $category->id }}" {{ $category->category_name == $product->category_name ? 'selected' : '' }}>
+                                                                            {{ $category->category_name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            
                                                             <div class="form-group">
                                                                 <label for="product_name">Product Name</label>
                                                                 <input type="text" name="product_name"
@@ -225,227 +248,85 @@
             </div>
         </div>
 
-        <!-- Add Product Modal -->
-        {{-- <div class="modal fade" id="addProduct" tabindex="-1" role="dialog" aria-labelledby="addProductLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addProductLabel">Add New Product</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form action="{{ route('products_two.store') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label for="product_name">Product Name</label>
-                                <input type="text" name="product_name" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="brand">Brand</label>
-                                <input type="text" name="brand" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="description">Description</label>
-                                <textarea name="description" class="form-control" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="alert_stock">Alert Stock</label>
-                                <input type="number" name="alert_stock" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="barcode">Barcode</label>
-                                <input type="text" name="barcode" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="qrcode">QRCode</label>
-                                <input type="text" name="qrcode" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="product_image">Product Image</label>
-                                <input type="file" name="product_image" class="form-control">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Add Product</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div> --}}
+       
         <!-- Add Product Modal -->
         <div class="modal fade" id="addProduct" tabindex="-1" role="dialog" aria-labelledby="addProductLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addProductLabel">Add New Product</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form action="{{ route('products_two.store') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-body">
-
-                            <!-- Section Dropdown -->
-                            <div class="form-group">
-                                <label for="section_id">Section</label>
-                                <select name="section_id" class="form-control" required>
-                                    <option value="">-- Select Section --</option>
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}">{{ $section->section_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <!-- Category Dropdown -->
-                            <div class="form-group">
-                                <label for="category_id">Category</label>
-                                <select name="category_id" class="form-control" required>
-                                    <option value="">-- Select Category --</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->category_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Existing Product Fields -->
-                            <div class="form-group">
-                                <label for="product_name">Product Name</label>
-                                <input type="text" name="product_name" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="brand">Brand</label>
-                                <input type="text" name="brand" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="description">Description</label>
-                                <textarea name="description" class="form-control" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="alert_stock">Alert Stock</label>
-                                <input type="number" name="alert_stock" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="barcode">Barcode</label>
-                                <input type="text" name="barcode" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="qrcode">QRCode</label>
-                                <input type="text" name="qrcode" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label for="product_image">Product Image</label>
-                                <input type="file" name="product_image" class="form-control">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Add Product</button>
-                        </div>
-                    </form>
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form action="{{ route('products_two.store') }}" method="POST" enctype="multipart/form-data"
+                class="modal-content">
+                @csrf
+                <div class="modal-header" style="background-color: teal;color:white;text-align:center;">
+                    <h5 class="modal-title" style="font-size: 2rem;">Add New Product</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-            </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Section</label>
+                        <select name="section_id" class="form-control" required>
+                            <option value="">-- Select Section --</option>
+                            @foreach ($sections as $section)
+                                <option value="{{ $section->id }}">{{ $section->section_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category_id" class="form-control" required>
+                            <option value="">-- Select Category --</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" name="product_name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <input type="text" name="brand" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Alert Stock</label>
+                        <input type="number" name="alert_stock" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Barcode</label>
+                        <input type="text" name="barcode" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>QRCode</label>
+                        <input type="text" name="qrcode" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Product Image</label>
+                        <input type="file" name="product_image" class="form-control">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                    <button class="btn btn-primary" type="submit">Add Product</button>
+                </div>
+            </form>
         </div>
-      
-    
-        <style>
-            /* Card Styling */
-            .card {
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-                border: none;
-                border-radius: 6px;
-            }
-        
-            .card-header {
-                background-color: #343a40;
-                color: #ffffff;
-                font-weight: 600;
-                border-radius: 6px 6px 0 0;
-            }
-        
-            /* Table Styling */
-            .table th, .table td {
-                vertical-align: middle !important;
-                font-size: 14px;
-            }
-        
-            .table-hover tbody tr:hover {
-                background-color: #f8f9fa;
-            }
-        
-            /* Modal Size */
-            .modal-dialog {
-                max-width: 700px;
-                margin: 1.75rem auto;
-            }
-        
-            @media (max-width: 768px) {
-                .modal-dialog {
-                    width: 65%;
-                   
-                }
-            }
-        
-            /* Modal Appearance */
-            .modal-header {
-                background-color: #f8f9fa;
-                border-bottom: 1px solid #dee2e6;
-                padding: 12px 20px;
-            }
-        
-            .modal-title {
-                font-weight: 600;
-                font-size: 18px;
-            }
-        
-            .modal-body {
-                padding: 20px;
-            }
-        
-            .modal-footer {
-                padding: 15px 20px;
-                background-color: #f1f1f1;
-                border-top: 1px solid #dee2e6;
-            }
-        
-            .form-control {
-                font-size: 14px;
-                padding: 8px 12px;
-            }
-        
-            /* Buttons */
-            .btn-sm {
-                padding: 5px 10px;
-                font-size: 13px;
-            }
-        
-            .btn-group .btn + .btn {
-                margin-left: 3px;
-            }
-        
-            .btn-primary, .btn-info, .btn-danger, .btn-dark {
-                border-radius: 4px;
-            }
-        
-            /* Alerts */
-            .alert {
-                font-size: 14px;
-            }
-        
-            /* Product Image */
-            .img-fluid {
-                max-width: 100%;
-                height: auto;
-                border-radius: 4px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-        </style>
-   
-        
-    
-        
+    </div>
+
     </div>
 @endsection

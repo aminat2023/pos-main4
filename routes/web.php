@@ -8,6 +8,9 @@ use App\Http\Controllers\ExpenseReportController;
 use App\Http\Controllers\IncomingStockController;
 use App\Http\Controllers\IncomingStockReportController;
 use App\Http\Controllers\JournalEntryController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanRepaymentController;
 use App\Http\Controllers\MoneyBoxController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductTwoController;
@@ -29,6 +32,8 @@ Route::prefix('profit-report')->group(function () {
     Route::get('/print', [ProfitReportController::class, 'print'])->name('profit.report.print');
 });
 
+Route::get('lang/{lang}', [LanguageController::class, 'switch'])->name('lang.switch');
+
 // Home
 Route::get('/', fn() => view('welcome'));
 Auth::routes();
@@ -49,12 +54,55 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('section_twos', App\Http\Controllers\SectionTwoController::class);
     Route::resource('expenses', ExpenseController::class);
     Route::resource('incoming_stock', IncomingStockController::class);
+    // Route::resource('counter_sales', CounterSalesController::class);
+    Route::get('/transactions/history', [App\Http\Controllers\TransactionsController::class, 'history'])->name('transactions.history');
+
+    Route::get('/unzip-stock', [\App\Http\Controllers\ZipImportController::class, 'unzipFile']);
+
+    Route::get('opening-stock/import', [IncomingStockController::class, 'showImportForm'])->name('opening_stock.import_form');
+    Route::post('opening-stock/import', [IncomingStockController::class, 'importOpeningStock'])->name('opening_stock.import');
+    Route::get('/opening-stock/manual', [IncomingStockController::class, 'showManualForm'])->name('opening_stock.manual_form');
+    Route::post('/opening-stock/manual', [IncomingStockController::class, 'storeManual'])->name('opening_stock.manual.store');
+    Route::get('opening-stock/import', [IncomingStockController::class, 'showImportForm'])->name('opening_stock.import_form');
+    Route::post('opening-stock/import', [IncomingStockController::class, 'importOpeningStock'])->name('opening_stock.import');
+    Route::post('opening-stock/manual', [IncomingStockController::class, 'storeManual'])->name('opening_stock.manual.store');
+
+    // Public loan application (no login required)
+    Route::get('/loans/create', [LoanController::class, 'create'])->name('loans.create');
+    Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
+
+    // Routes only for admins (login and admin middleware required)
+    Route::middleware(['auth', 'admin'])->group(function () {
+        // View approved loans
+        Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
+
+        // View specific loan
+        Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
+
+        // Approve loan
+        Route::post('/loans/{id}/approve', [LoanController::class, 'approve'])->name('loans.approve');
+
+        // Printable receipt
+        Route::get('/loans/{loan}/print', [LoanController::class, 'print'])->name('loans.print');
+
+        // Loan repayment form & submission (admin side)
+        Route::get('/loans/{loan}/repay', [LoanRepaymentController::class, 'create'])->name('repayments.create');
+        Route::post('/loans/{loan}/repay', [LoanRepaymentController::class, 'store'])->name('repayments.store');
+    });
+
+    // Incoming Stock Batch Actions
     Route::post('/incoming-stock/batch-from-supply', [IncomingStockController::class, 'importFromSupplies'])->name('incoming_stock.batch_import');
     Route::get('/incoming-stock/batch-review', [IncomingStockController::class, 'reviewBatch'])->name('incoming_stock.review_batch');
     Route::post('/incoming-stock/batch-submit', [IncomingStockController::class, 'submitBatch'])->name('incoming_stock.submit_batch');
+    Route::get('opening-stock/import', [IncomingStockController::class, 'showImportForm'])->name('opening_stock.import_form');
+    Route::post('opening-stock/import', [IncomingStockController::class, 'importOpeningStock'])->name('opening_stock.import');
+    // For importing supplies into stock
+    Route::get('incoming-stock/import-from-supplies', [IncomingStockController::class, 'importFromSupplies'])->name('incoming_stock.import_from_supplies');
 
-    // Route::resource('counter_sales', CounterSalesController::class);
-    Route::get('/transactions/history', [App\Http\Controllers\TransactionsController::class, 'history'])->name('transactions.history');
+    // System Preferences (includes language)
+    Route::get('/preferences', [App\Http\Controllers\SystemPreferenceController::class, 'index'])->name('preferences.index');
+    Route::post('/preferences', [App\Http\Controllers\SystemPreferenceController::class, 'update'])->name('preferences.update');
+    Route::post('/preferences/language', [App\Http\Controllers\SystemPreferenceController::class, 'setLanguage'])->name('preferences.language');
 
     // Add stock
     Route::get('/products/add-stock', [App\Http\Controllers\ProductsController::class, 'showAddStockForm'])->name('products.addStockForm');
@@ -107,13 +155,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         Route::get('/reports/counter-sales/export', [ReportController::class, 'export'])->name('reports.counter_sales.export');
     });
-
-  
-
-// Route::get('/profit-loss/pdf', [ReportController::class, 'downloadPdf'])->name('profit_loss.pdf');
-
-// Route::get('/profit-loss/excel', [ReportController::class, 'exportToExcel'])->name('profit_loss.excel');
-
 
     Route::get('/expense-report', [ExpenseReportController::class, 'index'])->name('expense.report');
     Route::get('/expense-repor/print', [ExpenseReportController::class, 'print'])->name('expense.report.print');
@@ -169,12 +210,45 @@ Route::middleware(['auth'])->prefix('vault')->group(function () {
     Route::post('store', [VaultTransactionController::class, 'store'])->name('vault.store');
 });
 Route::get('/vault/report', [VaultTransactionController::class, 'report'])->name('vault.report');
+Route::get('/vault/summary', [VaultTransactionController::class, 'summary'])->name('vault.summary');
+Route::get('/vault/report', [VaultTransactionController::class, 'report'])->name('vault.report');
+Route::get('/vault/export', [VaultTransactionController::class, 'export'])->name('vault.export');
+Route::get('/vault/export-excel', [VaultTransactionController::class, 'exportExcel'])
+    ->name('vault.export.excel');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/journal', [JournalEntryController::class, 'index'])->name('journal.index');
     Route::get('/journal/create', [JournalEntryController::class, 'create'])->name('journal.create');
     Route::post('/journal/store', [JournalEntryController::class, 'store'])->name('journal.store');
+    Route::get('/journal/trial-balance/export', [JournalEntryController::class, 'exportTrialBalance'])->name('journal.export.trial');
+    Route::get('/journal/ledger/export', [JournalEntryController::class, 'exportLedger'])->name('journal.export.ledger');
 });
+
+// Route::get('/vault/export-pdf', [VaultTransactionController::class, 'exportPDF'])
+//     ->name('vault.export.pdf');
+
+ Route::get('/vault/report', [App\Http\Controllers\VaultTransactionReportController::class, 'index'])->name('vault.report');
+
+
+// Route::get('/vault/report-table', [VaultTransactionController::class, 'reportTable'])->name('vault.report.table');
+
+// // Data table after clicking "Generate"
+ Route::get('/vault-report/generate', [VaultTransactionController::class, 'reportTable'])->name('vault.report');
+
+// Show the Vault Report Filter Form
+Route::get('/vault/report', [App\Http\Controllers\VaultTransactionController::class, 'reportForm'])
+    ->name('vault.report.form');
+
+// Generate filtered table
+Route::get('/vault/report/generate', [App\Http\Controllers\VaultTransactionController::class, 'reportTable'])
+    ->name('vault.report.table');
+
+// Export PDF
+Route::get('/vault/export-pdf', [App\Http\Controllers\VaultTransactionController::class, 'exportPDF'])
+    ->name('vault.export.pdf');
+
+
+
 Route::get('/reports/ledger', [JournalEntryController::class, 'ledger'])->name('journal.ledger');
 Route::get('/reports/journal', [JournalEntryController::class, 'report'])->name('journal.report');
 Route::get('/reports/trial-balance', [JournalEntryController::class, 'trialBalance'])->name('journal.trial_balance');

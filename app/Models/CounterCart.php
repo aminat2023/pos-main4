@@ -35,4 +35,10 @@ class CounterCart extends Model
         // Or if you're using ProductTwo model:
         // return $this->belongsTo(ProductTwo::class, 'product_code', 'product_code');
     }
+
+    
+    public function details()
+{
+    return $this->hasMany(CounterSalesDetail::class, 'counter_sales_id');
+}
 }

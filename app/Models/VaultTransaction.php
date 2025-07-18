@@ -13,6 +13,7 @@ class VaultTransaction extends Model
         'credit',
         'reason',
         'user_id',
+        'date'
     ];
     
 

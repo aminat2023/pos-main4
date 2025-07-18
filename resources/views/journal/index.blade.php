@@ -21,7 +21,17 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('journal.store') }}" method="POST" autocomplete="off">
+                    @if($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('journal.store') }}" id="journalForm">
                         @csrf
                         <input type="hidden" name="reference" value="{{ $reference }}">
                         <input type="hidden" name="is_double_leg" id="isDoubleLeg" value="{{ old('is_double_leg', 0) }}">
@@ -41,15 +51,15 @@
                             </div>
                         </div>
 
-                        <!-- SINGLE ENTRY SECTION -->
+                        <!-- SINGLE ENTRY -->
                         <div id="singleLegSection">
                             <div class="row mb-3">
                                 <div class="col-md-4">
-                                    <label class="form-label">Account <span class="text-danger">*</span></label>
-                                    <select name="account" class="form-select" onchange="toggleBankDropdown(this, 'bankSelectSingle')" required>
+                                    <label class="form-label">Account</label>
+                                    <select name="account" class="form-select" onchange="toggleBankDropdown(this, 'bankSelectSingle')">
                                         <option value="">-- Select --</option>
-                                        <option value="cash"{{ old('account') == 'cash' ? ' selected' : '' }}>Cash</option>
-                                        <option value="bank"{{ old('account') == 'bank' ? ' selected' : '' }}>Bank</option>
+                                        <option value="cash" {{ old('account') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="bank" {{ old('account') == 'bank' ? 'selected' : '' }}>Bank</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4" id="bankSelectSingle" style="display: none;">
@@ -62,26 +72,26 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Type <span class="text-danger">*</span></label>
-                                    <select name="type" class="form-select" required>
+                                    <label class="form-label">Type</label>
+                                    <select name="type" class="form-select">
                                         <option value="">-- Select --</option>
-                                        <option value="debit"{{ old('type') == 'debit' ? ' selected' : '' }}>Debit</option>
-                                        <option value="credit"{{ old('type') == 'credit' ? ' selected' : '' }}>Credit</option>
+                                        <option value="debit" {{ old('type') == 'debit' ? 'selected' : '' }}>Debit</option>
+                                        <option value="credit" {{ old('type') == 'credit' ? 'selected' : '' }}>Credit</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- DOUBLE ENTRY SECTION -->
+                        <!-- DOUBLE ENTRY -->
                         <div id="doubleLegSection" style="display: none;">
-                            <h6 class="text-muted mb-3">First Entry</h6>
+                            <h6 class="text-muted">First Entry</h6>
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Account</label>
-                                    <select name="entry1_account" class="form-select" onchange="toggleBankDropdown(this, 'bank1')" required>
+                                    <select name="entry1_account" class="form-select" onchange="toggleBankDropdown(this, 'bank1')">
                                         <option value="">-- Select --</option>
-                                        <option value="cash"{{ old('entry1_account') == 'cash' ? ' selected' : '' }}>Cash</option>
-                                        <option value="bank"{{ old('entry1_account') == 'bank' ? ' selected' : '' }}>Bank</option>
+                                        <option value="cash" {{ old('entry1_account') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="bank" {{ old('entry1_account') == 'bank' ? 'selected' : '' }}>Bank</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4" id="bank1" style="display: none;">
@@ -95,22 +105,22 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Type</label>
-                                    <select name="entry1_type" class="form-select" required>
+                                    <select name="entry1_type" class="form-select">
                                         <option value="">-- Select --</option>
-                                        <option value="debit"{{ old('entry1_type') == 'debit' ? ' selected' : '' }}>Debit</option>
-                                        <option value="credit"{{ old('entry1_type') == 'credit' ? ' selected' : '' }}>Credit</option>
+                                        <option value="debit" {{ old('entry1_type') == 'debit' ? 'selected' : '' }}>Debit</option>
+                                        <option value="credit" {{ old('entry1_type') == 'credit' ? 'selected' : '' }}>Credit</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <h6 class="text-muted mb-3">Second Entry</h6>
+                            <h6 class="text-muted">Second Entry</h6>
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Account</label>
-                                    <select name="entry2_account" class="form-select" onchange="toggleBankDropdown(this, 'bank2')" required>
+                                    <select name="entry2_account" class="form-select" onchange="toggleBankDropdown(this, 'bank2')">
                                         <option value="">-- Select --</option>
-                                        <option value="cash"{{ old('entry2_account') == 'cash' ? ' selected' : '' }}>Cash</option>
-                                        <option value="bank"{{ old('entry2_account') == 'bank' ? ' selected' : '' }}>Bank</option>
+                                        <option value="cash" {{ old('entry2_account') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                        <option value="bank" {{ old('entry2_account') == 'bank' ? 'selected' : '' }}>Bank</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4" id="bank2" style="display: none;">
@@ -124,17 +134,17 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Type</label>
-                                    <select name="entry2_type" class="form-select" required>
+                                    <select name="entry2_type" class="form-select">
                                         <option value="">-- Select --</option>
-                                        <option value="debit"{{ old('entry2_type') == 'debit' ? ' selected' : '' }}>Debit</option>
-                                        <option value="credit"{{ old('entry2_type') == 'credit' ? ' selected' : '' }}>Credit</option>
+                                        <option value="debit" {{ old('entry2_type') == 'debit' ? 'selected' : '' }}>Debit</option>
+                                        <option value="credit" {{ old('entry2_type') == 'credit' ? 'selected' : '' }}>Credit</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Description <span class="text-danger">*</span></label>
+                            <label class="form-label">Description</label>
                             <input type="text" name="description" class="form-control" value="{{ old('description') }}" required>
                         </div>
 
@@ -153,31 +163,30 @@
     function toggleDoubleForm() {
         const isChecked = document.getElementById('toggleDouble').checked;
         document.getElementById('isDoubleLeg').value = isChecked ? 1 : 0;
+
         document.getElementById('singleLegSection').style.display = isChecked ? 'none' : 'block';
         document.getElementById('doubleLegSection').style.display = isChecked ? 'block' : 'none';
-
-        // Dynamically update required attributes
-        document.querySelectorAll('#singleLegSection select, #singleLegSection input').forEach(el => {
-            el.required = !isChecked;
-        });
-        document.querySelectorAll('#doubleLegSection select, #doubleLegSection input').forEach(el => {
-            el.required = isChecked;
-        });
     }
 
-    function toggleBankDropdown(selectElem, targetId) {
-        const show = selectElem.value === 'bank';
-        document.getElementById(targetId).style.display = show ? 'block' : 'none';
+    function toggleBankDropdown(select, targetId) {
+        const show = select.value === 'bank';
+        const target = document.getElementById(targetId);
+        if (target) target.style.display = show ? 'block' : 'none';
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        toggleDoubleForm(); // Apply correct visibility on load
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleDoubleForm();
 
-        // Pre-show any dropdowns for old input
-        const accountFields = ['account', 'entry1_account', 'entry2_account'];
-        accountFields.forEach(field => {
-            const el = document.querySelector(`[name="${field}"]`);
-            if (el) toggleBankDropdown(el, 'bank' + (field.includes('entry1') ? '1' : field.includes('entry2') ? '2' : 'SelectSingle'));
+        // Show bank dropdowns if old values present
+        const accountFields = [
+            { field: 'account', id: 'bankSelectSingle' },
+            { field: 'entry1_account', id: 'bank1' },
+            { field: 'entry2_account', id: 'bank2' }
+        ];
+
+        accountFields.forEach(({ field, id }) => {
+            const select = document.querySelector(`[name="${field}"]`);
+            if (select) toggleBankDropdown(select, id);
         });
     });
 </script>

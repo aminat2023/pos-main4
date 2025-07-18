@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Session;
 
 class SessionTimeout
 {
-    protected $timeout = 300; // 5 minutes (in seconds)
+    protected $timeout = 800; // 5 minutes (in seconds)
 
     public function handle($request, Closure $next)
     {

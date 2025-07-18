@@ -13,6 +13,7 @@ class CounterSalesDetail extends Model
 
     protected $fillable = [
         'user_id',
+        'invoice_no', // 👈 add this
         'product_code',
         'product_name',
         'quantity',
@@ -43,4 +44,6 @@ class CounterSalesDetail extends Model
     {
         return $this->belongsTo(IncomingStock::class, 'product_code', 'product_code'); // adjust field if needed
     }
+
+
 }

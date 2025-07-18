@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice - Viral Computers Inc</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; margin: 40px; color: #333;  border: 5px solid #0066cc;padding: 20px;}
+    h1 { color: #0066cc; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+    th { background-color: #f4f4f4; }
+    .header, .footer { margin-bottom: 20px; }
+    .total-row td { font-weight: bold; }
+    .print-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1> PAYMENT INVOICE</h1>
+
+  <div class="header">
+    <p><strong>VIRAL COMPUTERS INC</strong><br>
+    225, Lagos/Abeokuta Expressway, Obadeyi Bus-Stop<br>
+    Beside Keystone Bank, Abule-Egba, Lagos<br>
+    Phone: +234-8069466122 | Email: ayoade@viralcomputers.com</p>
+  </div>
+
+  <div>
+    <p><strong>Invoice To:</strong><br>
+    AVEST MICROFINANCE LTD<br>
+    4th Floor, Surveyor House, Alausa, Ikeja, Lagos State</p>
+
+    <p><strong>Invoice #:</strong> INV-00235<br>
+    <strong>Invoice Date:</strong> July 15, 2025<br>
+    <strong>Due Date:</strong> July 22, 2025</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Description</th>
+        <th>Amount (₦)</th>
+        <th>Total (₦)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>3</td>
+        <td>RE-MIGRATION OF CUSTOMERS INFORMATIONS AND BALANCES UPLOAD</td>
+        <td>200,000</td>
+        <td>200,000</td>
+      </tr>
+     
+     
+      <tr class="total-row">
+        <td colspan="3" style="text-align:right">Total Amount Due</td>
+        <td>₦200,000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p><strong>Payment Instructions:</strong><br>
+    Bank: OPAY<br>
+    Account Name: AYOADE OLEKAN YUSUF<br>
+    Account Number: 8102325412</p>
+
+    <p><strong>Note:</strong><br>
+    Thank you for your business. Please make payment on or before the due date.</p>
+
+  </div>
+
+  <button class="print-btn" onclick="window.print()">🖨️ Print Invoice</button>
+
+</body>
+</html>

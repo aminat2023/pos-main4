@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\VaultTransaction;
+use App\Models\BankTransaction;
+
+
 if (!function_exists('getPreference')) {
     function getPreference($key, $default = null)
     {
@@ -22,4 +26,27 @@ if (!function_exists('getPreference')) {
         return $value;
     }
 }
+
+
+
+if (!function_exists('getVaultBalance')) {
+    function getVaultBalance(): float
+    {
+        $totalIn = VaultTransaction::sum('debit');
+        $totalOut = VaultTransaction::sum('credit');
+        return $totalIn - $totalOut;
+    }
+}
+
+if (!function_exists('getBankBalance')) {
+    function getBankBalance($bankName): float
+    {
+        $totalIn = BankTransaction::where('bank_name', $bankName)->sum('debit');
+        $totalOut = BankTransaction::where('bank_name', $bankName)->sum('credit');
+        return $totalIn - $totalOut;
+    }
+}
+
+
+
 

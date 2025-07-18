@@ -34,9 +34,15 @@
                                         <input type="hidden" name="stocks[{{ $index }}][cost_price]" value="{{ $supply->unit_price }}">
                                     </td>
                                     <td>
-                                        <input type="number" step="0.01" min="0" name="stocks[{{ $index }}][selling_price]"
-                                            class="form-control" placeholder="Enter selling price" required>
+                                        @if($supply->already_imported)
+                                            <input type="number" class="form-control" value="{{ $supply->unit_price + 50 }}" disabled>
+                                            <input type="hidden" name="stocks[{{ $index }}][selling_price]" value="{{ $supply->unit_price + 50 }}">
+                                        @else
+                                            <input type="number" step="0.01" min="0" name="stocks[{{ $index }}][selling_price]"
+                                                class="form-control" placeholder="Enter selling price" required>
+                                        @endif
                                     </td>
+                                    
                                 </tr>
                             @endif
                         @endforeach
@@ -47,12 +53,12 @@
             <button type="submit" class="btn btn-success w-100 mt-3">✅ Import All to Stock</button>
         </form>
     @else
-        <div class="alert alert-info text-center">
+        {{-- <div class="alert alert-info text-center">
             ✅ All supplies have been imported.<br>
             <a href="{{ route('incoming_stock.import_from_supplies') }}" class="btn btn-outline-primary mt-2">
                 🔄 Reload Supplies
             </a>
-        </div>
+        </div> --}}
     @endif
 </div>
 @endsection

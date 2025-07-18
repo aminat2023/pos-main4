@@ -11,8 +11,8 @@
         <li><a href="{{ route('sections.index') }}"><i class="fa fa-th-large"></i> Sections</a></li>
         <li><a href="{{ route('categories.index') }}"><i class="fa fa-list-alt"></i> Categories</a></li>
         {{-- <li><a href="{{ route('sub_categories.index') }}"><i class="fa fa-list"></i> Sub Categories</a></li> --}}
-        <li><a href="{{ route('till.withdraw.create') }}"><i class="fa fa-arrow-circle-up"></i> Withdraw Till</a></li>
-        <li><a href="{{ route('daily_sales.index') }}"><i class="fa fa-history"></i> History</a></li>
+        <li><a href="{{ route('till.withdraw.create') }}"><i class="fa fa-arrow-circle-up"></i>Till Withdrawl</a></li>
+        <li><a href="{{ route('daily_sales.index') }}"><i class="fa fa-history"></i> Sales History</a></li>
 
         <!-- Settings Dropdown -->
         <li>
@@ -24,13 +24,19 @@
                     <li><a class="list-group-item" href="#" data-toggle="modal" data-target="#addUser">Add New User</a></li>
                     <li><a class="list-group-item" href="{{ route('preferences.index') }}">System Preferences</a></li>
                     <li><a class="list-group-item" href="#">Payment Methods</a></li>
+                    <li>
+                        <a class="list-group-item" {{ request()->routeIs('opening_stock.import') ? 'active' : '' }}" href="{{ route('opening_stock.import') }}">
+                            📥 Import Opening Stock
+                        </a>
+                    </li>
+                    
                 </ul>
             </div>
         </li>
 
         <li>
             <a class="nav-link {{ request()->is('user-activity-logs') ? 'active' : '' }}" href="{{ route('user.activity.logs') }}">
-                🕵️ Activity Logs
+                🕵️ Log Trail
             </a>
         </li>
 
@@ -183,4 +189,61 @@
         background-color: #008B8B;
         color: white;
     }
+    /* Mobile & Tablet Responsiveness */
+@media (max-width: 991.98px) {
+    #sidebar {
+        width: 100%;
+        position: relative;
+    }
+
+    #sidebar ul li a {
+        font-size: 14px;
+        padding: 8px 12px;
+        width: 100%;
+    }
+
+    #sidebar ul.lead {
+        width: 100%;
+        border-bottom: none;
+    }
+
+    .list-group-item {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
+    .modal.right .modal-dialog {
+        width: 100%;
+    }
+
+    .modal.right .modal-content {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    #sidebar ul li a {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+
+    .list-group-item {
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+
+    .modal.right .modal-dialog {
+        width: 100%;
+    }
+
+    .modal-title {
+        font-size: 18px;
+    }
+
+    .btn {
+        font-size: 13px !important;
+        padding: 5px 10px !important;
+    }
+}
+
 </style>

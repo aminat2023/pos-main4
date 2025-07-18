@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <style>
         body {
@@ -34,7 +35,8 @@
             font-size: 11px;
         }
 
-        .item, .total {
+        .item,
+        .total {
             display: flex;
             justify-content: space-between;
             margin-bottom: 2px;
@@ -64,6 +66,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="receipt">
         <!-- Header -->
@@ -72,11 +75,14 @@
             <img src="{{ asset('storage/' . ltrim($preferences['business_logo'], '/')) }}" alt="Logo" style="max-height: 60px; margin-top: 10px;">
         @endif
          --}}
-        
-                    <hr><h2>{{ getPreference('business_name', 'My Business') }}</h2><hr>
-            <p>{{ getPreference('office_address', 'No Address Provided') }}</p> 
+
+
+            <hr>
+            <h2>{{ getPreference('business_name', 'My Business') }}</h2>
+            <hr>
+            <p>{{ getPreference('office_address', 'No Address Provided') }}</p>
             <p>{{ now()->format('Y-m-d H:i') }}</p>
-           
+
         </div>
 
         <!-- Items -->
@@ -94,21 +100,19 @@
             <span>Total:</span>
             <span>₦{{ number_format((float) collect($orderItems)->sum('total_amount'), 1) }}</span>
         </div>
-        
+
         <div class="total">
             <span>Paid:</span>
             <span>₦{{ number_format((float) $pay_money, 1) }}</span>
         </div>
-        
+
         <div class="total">
             <span>Change:</span>
             <span>
-                ₦{{ number_format(
-                    (float) collect($orderItems)->sum('total_amount') - (float) $pay_money,
-                    1
-                ) }}            </span>
+                ₦{{ number_format((float) collect($orderItems)->sum('total_amount') - (float) $pay_money, 1) }}
+            </span>
         </div>
-        
+
 
         <hr>
 
@@ -122,4 +126,5 @@
         </div>
     </div>
 </body>
+
 </html>

@@ -2,163 +2,114 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\VaultTransaction;
 use App\Models\BankTransaction;
+use App\Models\MoneyBox;
+use App\Models\VaultTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class VaultTransactionController extends Controller
 {
+    public function store(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:in,out',
+            'amount' => 'required|numeric|min:1',
+            'bank_name' => 'required|string',
+        ]);
+    
+        $type = $request->type;
+        $amount = $request->amount;
+        $bank = $request->bank_name;
+    
+        // Save to VaultTransactions table
+        VaultTransaction::create([
+            'user_id' => Auth::id(),
+            'amount' => $amount,
+            'type' => $type,
+            'debit' => $type === 'out' ? $amount : null,
+            'credit' => $type === 'in' ? $amount : null,
+            'bank_name' => $bank,
+            'date' => now()->toDateString(),
+        ]);
+    
+        // ✅ Save to BankTransactions table too
+        BankTransaction::create([
+            'user_id' => Auth::id(),
+            'amount' => $amount,
+            'debit' => $type === 'in' ? $amount : null,   // bank loses money when vault receives
+            'credit' => $type === 'out' ? $amount : null, // bank gains money when vault pays out
+            'bank_name' => $bank,
+            'payment_method' => 'vault',
+            'date' => now()->toDateString(),
+        ]);
+    
+        // Update MoneyBox balances
+        $vault = MoneyBox::where('bank_name', 'Vault')->first();
+        $selectedBank = MoneyBox::where('bank_name', $bank)->first();
+    
+        if ($type === 'in') {
+            // Bank loses, vault gains
+            $vault->balance += $amount;
+            $selectedBank->balance -= $amount;
+        } elseif ($type === 'out') {
+            // Vault loses, bank gains
+            $vault->balance -= $amount;
+            $selectedBank->balance += $amount;
+        }
+    
+        $vault->save();
+        $selectedBank->save();
+    
+        return redirect()->back()->with('success', 'Vault transaction and bank record saved successfully.');
+    }
+    
+    // Show form to filter vault report
+    public function reportForm()
+    {
+        return view('vault.report');  // resources/views/vault/report.blade.php
+    }
+
+    // Process filter and return transactions
+    public function reportTable(Request $request)
+    {
+        $filter = $request->filter_type;
+        $from = $request->from_date;
+        $to = $request->to_date;
+        $month = $request->month;
+        $year = $request->year;
+
+        $query = VaultTransaction::query();
+
+        if ($filter === 'date' && $from && $to) {
+            $query->whereBetween('date', [$from, $to]);
+        } elseif ($filter === 'month' && $month) {
+            $parsedMonth = Carbon::parse($month);
+            $query
+                ->whereMonth('date', $parsedMonth->month)
+                ->whereYear('date', $parsedMonth->year);
+        } elseif ($filter === 'year' && $year) {
+            $query->whereYear('date', $year);
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->get();
+        $noResults = $transactions->isEmpty();
+
+        return view('vault.report_table', compact('transactions', 'noResults'));
+    }
+
+    // Show Vault IN form
     public function showVaultInForm()
     {
-        return view('vault.vault_in');
+        return view('vault.in');  // resources/views/vault/in.blade.php
     }
 
+    // Show Vault OUT form
     public function showVaultOutForm()
     {
-        return view('vault.vault_out');
+        return view('vault.out');  // resources/views/vault/out.blade.php
     }
 
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'type' => 'required|in:in,out',
-    //         'amount' => 'required|numeric|min:1',
-    //         'reason' => 'nullable|string|max:255',
-    //         'bank_name' => $request->type === 'out' ? 'required|string|max:255' : 'nullable',
-    //     ]);
-
-    //     // Store in VaultTransaction table
-    //     VaultTransaction::create([
-    //         'type' => $request->type,
-    //         'amount' => $request->amount,
-    //         'reason' => $request->reason,
-    //         'user_id' => Auth::id(),
-    //     ]);
-
-    //     // If withdrawal from vault, also store in bank_transactions
-    //     if ($request->type === 'out') {
-    //         BankTransaction::create([
-    //             'user_id' => Auth::id(),
-    //             'amount' => $request->amount,
-    //             'bank_name' => $request->bank_name,
-    //             'payment_method' => 'withdrawal_from_vault',
-    //             'reference' => 'VAULT-' . strtoupper(uniqid()),
-    //             'date' => now(),
-    //         ]);
-    //     }
-
-    //     return back()->with('success', 'Vault transaction recorded successfully.');
-    // }
-
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'type' => 'required|in:in,out',
-    //         'amount' => 'required|numeric|min:1',
-    //         'reason' => 'nullable|string|max:255',
-    //         'bank_name' => $request->type === 'in' ? 'required|string|max:255' : 'nullable',
-    //     ]);
-    
-    //     $amount = $request->type === 'out' ? -abs($request->amount) : abs($request->amount);
-    
-    //     // Store vault transaction
-    //     VaultTransaction::create([
-    //         'type' => $request->type,
-    //         'amount' => $amount,
-    //         'reason' => $request->reason,
-    //         'user_id' => auth()->id(),
-    //     ]);
-    
-    //     // If depositing to vault from a bank, subtract from bank balance
-    //     if ($request->type === 'in') {
-    //         \App\Models\BankTransaction::create([
-    //             'user_id' => auth()->id(),
-    //             'amount' => -abs($request->amount), // debit bank
-    //             'bank_name' => $request->bank_name,
-    //             'payment_method' => 'vault_deposit',
-    //             'reference' => 'VAULT-BANK-' . strtoupper(uniqid()),
-    //             'date' => now(),
-    //         ]);
-    //     }
-    
-    //     return back()->with('success', 'Vault transaction recorded successfully.');
-    // }
-
-    public function store(Request $request)
-{
-    $request->validate([
-        'type' => 'required|in:in,out',
-        'amount' => 'required|numeric|min:1',
-        'reason' => 'nullable|string|max:255',
-        'bank_name' => $request->type === 'in' ? 'required|string|max:255' : 'nullable',
-    ]);
-
-    // If type is 'out', amount becomes negative (vault to bank)
-    $amount = $request->type === 'out' ? -abs($request->amount) : abs($request->amount);
-
-    // 1. Save Vault Transaction
-    VaultTransaction::create([
-        'type' => $request->type,
-        'amount' => $amount,
-        'reason' => $request->reason,
-        'user_id' => auth()->id(),
-    ]);
-
-    // 2. Create a corresponding Bank Transaction
-    if ($request->type === 'in') {
-        // Vault receives money from bank → bank is debited
-        \App\Models\BankTransaction::create([
-            'user_id'        => auth()->id(),
-            'amount'         => -abs($request->amount), // negative → debit
-            'debit'          => abs($request->amount),  // fill debit
-            'credit'         => 0.00,
-            'bank_name'      => $request->bank_name,
-            'payment_method' => 'vault_deposit',
-            'reference'      => 'VAULT-BANK-' . strtoupper(uniqid()),
-            'date'           => now(),
-        ]);
-    } elseif ($request->type === 'out') {
-        // Vault sends money to bank → bank is credited
-        \App\Models\BankTransaction::create([
-            'user_id'        => auth()->id(),
-            'amount'         => abs($request->amount),  // positive → credit
-            'credit'         => abs($request->amount),
-            'debit'          => 0.00,
-            'bank_name'      => $request->bank_name,
-            'payment_method' => 'vault_withdrawal',
-            'reference'      => 'VAULT-BANK-' . strtoupper(uniqid()),
-            'date'           => now(),
-        ]);
-    }
-
-    return back()->with('success', 'Vault transaction recorded successfully.');
-}
-
-
-
-public function report(Request $request)
-{
-    $query = \App\Models\VaultTransaction::query();
-
-    // Filter by date if provided
-    if ($request->filled('from') && $request->filled('to')) {
-        $query->whereBetween('created_at', [$request->from, $request->to]);
-    }
-
-    // Get filtered transactions
-    $transactions = $query->latest()->get();
-
-    // Sum debit and credit amounts
-    $totalOut = $transactions->sum('debit');
-    $totalIn = $transactions->sum('credit');
-
-    // Calculate balance
-    $balance = $totalIn - $totalOut;
-
-    return view('vault.report', compact('transactions', 'totalIn', 'totalOut', 'balance'));
-}
-
-    
-
+    // Store vault transaction
 }

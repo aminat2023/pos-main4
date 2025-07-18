@@ -1,84 +1,89 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container d-flex justify-content-center mt-3">
-    <div class="card w-100" style="max-width: 700px; background: white; color: black;">
-        <div class="card-body">
+<style>
+    .btn-check:checked + .btn-outline-teal {
+        background-color: teal;
+        color: white;
+        border-color: teal;
+    }
 
-            <!-- Business Name -->
-            <h3 class="text-center mb-4">{{ getPreference('business_name', 'My Business') }}</h3>
+  
 
-            <!-- Title -->
-            <h4 class="mb-3">Vault Balance Report</h4>
+</style>
 
-            <!-- Export Buttons -->
+<div class="container mt-4">
+    <div class="card shadow rounded">
+        <div class="card-header text-white" style="background-color: teal;">
+            <h5 class="mb-0"><i class="fa-solid fa-money-bill"></i> Vault Transaction Report</h5>
+        </div>
 
-            {{-- <div class="mb-3 d-flex gap-2">
-                <a href="{{ route('vault.export.pdf', request()->all()) }}" class="btn btn-danger btn-sm">Export PDF</a>
-                <a href="{{ route('vault.export.excel', request()->all()) }}" class="btn btn-success btn-sm">Export Excel</a>
-                <button onclick="window.print()" class="btn btn-dark btn-sm">Print</button>
-            </div> --}}
+        <div class="card-body bg-white">
+            <form method="GET" action="{{ route('vault.report.table') }}" id="filterForm">
+                <div class="mb-3">
+                    <label class="form-label d-block">📊 Choose Filter</label>
+                    <div class="btn-group" role="group" aria-label="Filter options">
+                        <input type="radio" class="btn-check" name="filter_type" id="date" value="date" required>
+                        <label class="btn btn-outline-teal" for="date">By Date Range</label>
 
-            <!-- Filter -->
-            <form class="form-inline mb-3" method="GET" action="{{ route('vault.report') }}">
-                <input type="date" name="from" class="form-control mr-2" value="{{ request('from') }}">
-                <input type="date" name="to" class="form-control mr-2" value="{{ request('to') }}">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </form>
+                        <input type="radio" class="btn-check" name="filter_type" id="month" value="month">
+                        <label class="btn btn-outline-teal" for="month">By Month</label>
 
-            <!-- Totals -->
-            <div class="card mb-3">
-                <div class="card-body">
-                    <strong>Total In (Credit):</strong> ₦{{ number_format($totalIn, 2) }}<br>
-                    <strong>Total Out (Debit):</strong> ₦{{ number_format(abs($totalOut), 2) }}<br>
-                    <strong>Current Vault Balance:</strong> ₦{{ number_format($balance, 2) }}
+                        <input type="radio" class="btn-check" name="filter_type" id="year" value="year">
+                        <label class="btn btn-outline-teal" for="year">By Year</label>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Table -->
-            <table class="table table-bordered table-sm">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Date</th>
-                        <th>User</th>
-                        <th>Reason</th>
-                        <th>Debit</th>
-                        <th>Credit</th>
-                     
-                       
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($transactions as $index => $tx)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $tx->created_at->format('Y-m-d H:i') }}</td>
-                            <td>{{ $tx->user->name ?? 'N/A' }}</td>
-                            <td>{{ $tx->reason }}</td>
-                            <td>
-                                @if($tx->debit)
-                                    ₦{{ number_format($tx->debit, 2) }}
-                                @endif
-                            </td>
-                            <td>
-                                @if($tx->credit)
-                                    ₦{{ number_format($tx->credit, 2) }}
-                                @endif
-                            </td>
-                            
-                            
-                           
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6">No transactions found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                <div class="row">
+                    <div class="col-md-4 filter-date d-none">
+                        <label class="form-label">From Date</label>
+                        <input type="date" name="from_date" class="form-control rounded-pill" onchange="submitForm()">
+                    </div>
+
+                    <div class="col-md-4 filter-date d-none">
+                        <label class="form-label">To Date</label>
+                        <input type="date" name="to_date" class="form-control rounded-pill" onchange="submitForm()">
+                    </div>
+
+                    <div class="col-md-4 filter-month d-none mt-3">
+                        <label class="form-label">Select Month</label>
+                        <input type="month" name="month" class="form-control rounded-pill" onchange="submitForm()">
+                    </div>
+
+                    <div class="col-md-4 filter-year d-none mt-3">
+                        <label class="form-label">Year</label>
+                        <input type="number" name="year" class="form-control rounded-pill" placeholder="e.g., 2025" onchange="submitForm()">
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+    const dateFields = document.querySelectorAll('.filter-date');
+    const monthField = document.querySelector('.filter-month');
+    const yearField = document.querySelector('.filter-year');
+    const filterForm = document.getElementById('filterForm');
+
+    document.querySelectorAll('input[name="filter_type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            dateFields.forEach(el => el.classList.add('d-none'));
+            monthField.classList.add('d-none');
+            yearField.classList.add('d-none');
+
+            if (radio.value === 'date') {
+                dateFields.forEach(el => el.classList.remove('d-none'));
+            } else if (radio.value === 'month') {
+                monthField.classList.remove('d-none');
+            } else if (radio.value === 'year') {
+                yearField.classList.remove('d-none');
+            }
+        });
+    });
+
+    function submitForm() {
+        filterForm.submit();
+    }
+</script>
 @endsection
